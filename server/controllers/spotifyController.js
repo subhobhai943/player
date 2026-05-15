@@ -3,18 +3,25 @@ const axios = require('axios');
 let cachedToken = null;
 let tokenExpiry = 0;
 
-// Get Spotify access token using Client Credentials flow
 const getSpotifyToken = async () => {
   if (cachedToken && Date.now() < tokenExpiry) return cachedToken;
 
+  const clientId = process.env.SPOTIFY_CLIENT_ID;
+  const clientSecret = process.env.SPOTIFY_CLIENT_SECRET;
+
+  if (!clientId || !clientSecret) {
+    throw new Error('SPOTIFY_CLIENT_ID or SPOTIFY_CLIENT_SECRET is missing from environment variables');
+  }
+
+  const credentials = Buffer.from(`${clientId}:${clientSecret}`).toString('base64');
+
   const response = await axios.post(
     'https://accounts.spotify.com/api/token',
-    new URLSearchParams({ grant_type: 'client_credentials' }),
+    'grant_type=client_credentials',
     {
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      auth: {
-        username: process.env.SPOTIFY_CLIENT_ID,
-        password: process.env.SPOTIFY_CLIENT_SECRET,
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'Authorization': `Basic ${credentials}`,
       },
     }
   );
@@ -49,8 +56,10 @@ const searchSpotify = async (req, res) => {
 
     res.json({ tracks });
   } catch (err) {
-    console.error('Spotify search error:', err.message);
-    res.status(500).json({ message: 'Spotify search failed', error: err.message });
+    const status = err.response?.status || 500;
+    const detail = err.response?.data || err.message;
+    console.error('Spotify search error:', JSON.stringify(detail));
+    res.status(status).json({ message: 'Spotify search failed', error: detail });
   }
 };
 
@@ -62,7 +71,6 @@ const getSpotifyTrack = async (req, res) => {
       headers: { Authorization: `Bearer ${token}` },
       params: { market: 'IN' },
     });
-
     const track = response.data;
     res.json({
       spotifyId: track.id,
@@ -75,7 +83,8 @@ const getSpotifyTrack = async (req, res) => {
       spotifyUrl: track.external_urls.spotify,
     });
   } catch (err) {
-    res.status(500).json({ message: 'Failed to get track', error: err.message });
+    const detail = err.response?.data || err.message;
+    res.status(500).json({ message: 'Failed to get track', error: detail });
   }
 };
 
@@ -83,12 +92,10 @@ const getSpotifyTrack = async (req, res) => {
 const getFeaturedTracks = async (req, res) => {
   try {
     const token = await getSpotifyToken();
-    // Get trending tracks using a popular search
     const response = await axios.get('https://api.spotify.com/v1/search', {
       headers: { Authorization: `Bearer ${token}` },
       params: { q: 'year:2024-2025', type: 'track', limit: 20, market: 'IN' },
     });
-
     const tracks = response.data.tracks.items.map((track) => ({
       spotifyId: track.id,
       title: track.name,
@@ -99,10 +106,10 @@ const getFeaturedTracks = async (req, res) => {
       duration: Math.floor(track.duration_ms / 1000),
       spotifyUrl: track.external_urls.spotify,
     }));
-
     res.json({ tracks });
   } catch (err) {
-    res.status(500).json({ message: 'Failed to get featured tracks', error: err.message });
+    const detail = err.response?.data || err.message;
+    res.status(500).json({ message: 'Failed to get featured tracks', error: detail });
   }
 };
 
