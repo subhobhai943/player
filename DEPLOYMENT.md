@@ -4,14 +4,12 @@ This guide walks you through deploying the **Player** app completely free using:
 
 | Service | What it hosts | Free tier |
 |---|---|---|
-| [Vercel](https://vercel.com) | React frontend (client) | ✅ Always free |
-| [Koyeb](https://koyeb.com) | Node.js backend (server) | ✅ Always-on, **no cold starts** |
+| [Vercel](https://vercel.com) | React frontend (client) | ✅ Always free, no credit card |
+| [Railway](https://railway.app) | Node.js backend (server) | ✅ No credit card, no cold starts |
 | [MongoDB Atlas](https://www.mongodb.com/atlas) | MongoDB database | ✅ 512MB free cluster |
 | [Cloudinary](https://cloudinary.com) | Audio + image uploads | ✅ 25GB free storage |
 
-> ✅ **Why Koyeb instead of Render?** Render's free tier sleeps after 15 minutes of inactivity (30s cold start). Koyeb's free tier is **always-on with zero cold starts** — no credit card required.
-
-> 🟡 **Railway** is listed as an alternative at the end if Koyeb's free tier is unavailable in your region.
+> ✅ **Why Railway?** Railway requires **no credit card** to sign up. You get $5 free trial credit for 30 days, then $1/month in ongoing free credits — a small Express app uses well under $1/month so it runs **effectively free forever** with no cold starts.
 
 ---
 
@@ -41,7 +39,7 @@ This guide walks you through deploying the **Player** app completely free using:
 3. Click **"Allow Access From Anywhere"** → this sets `0.0.0.0/0`
 4. Click **"Confirm"**
 
-> This is required so Koyeb's servers can connect to Atlas from any IP.
+> This is required so Railway's servers can connect to Atlas from any IP.
 
 ### Step 4 — Get your connection string
 
@@ -55,7 +53,7 @@ This guide walks you through deploying the **Player** app completely free using:
 5. Replace `<password>` with your actual password
 6. Add the database name before the `?`:
    ```
-   mongodb+srv://playeruser:yourpassword@cluster0.xxxxx.mongodb.net/player?retryWrites=true&w=majority
+   mongodb+srv://playeruser:yourpassword@cluster0.xxxxx.mongodb.net/player?retryWrites=true&w=majority&appName=Cluster0
    ```
 7. ✅ **Save this string** — you’ll need it in Part 3
 
@@ -81,75 +79,79 @@ On the Cloudinary dashboard, copy these three values:
 
 ---
 
-## PART 3 — Koyeb (Backend / Server) ⭐ Recommended
+## PART 3 — Railway (Backend / Server) ⭐ Recommended
 
-> Koyeb offers a permanently free web service with **no sleep, no cold starts, and no credit card required**.
+> Railway requires **no credit card**. Sign up with GitHub and deploy instantly.
 
-### Step 1 — Create a Koyeb account
+### Step 1 — Create a Railway account
 
-1. Go to [https://app.koyeb.com](https://app.koyeb.com)
-2. Click **"Sign up"** → **"Continue with GitHub"**
-3. Authorize Koyeb to access your GitHub
+1. Go to [https://railway.app](https://railway.app)
+2. Click **"Login"** → **"Login with GitHub"**
+3. Authorize Railway to access your GitHub account
 
-### Step 2 — Create a new service
+### Step 2 — Create a new project
 
-1. On the Koyeb dashboard click **"Create Service"**
-2. Choose **"GitHub"** as the deployment source
-3. Select your **`player`** repository
-4. Set **Branch** to `main`
+1. On the Railway dashboard click **"New Project"**
+2. Select **"Deploy from GitHub repo"**
+3. Find and click the **`player`** repository
+4. Railway will detect it as a Node.js app automatically
 
 ### Step 3 — Configure the service
 
-Fill in the build & run settings:
+After the repo is connected:
+
+1. Click on the service card that was created
+2. Go to the **"Settings"** tab
+3. Set the following:
 
 | Setting | Value |
 |---|---|
-| **Service name** | `player-server` |
-| **Region** | `Singapore` (closest to India) |
-| **Branch** | `main` |
-| **Root directory** | `server` |
-| **Builder** | `Buildpack` (auto-detects Node.js) |
-| **Build command** | `npm install` |
-| **Run command** | `node index.js` |
-| **Instance type** | `Free` |
-| **Port** | `5000` |
+| **Root Directory** | `server` |
+| **Build Command** | `npm install` |
+| **Start Command** | `node index.js` |
+| **Watch Paths** | `server/**` |
+
+4. Go to **"Networking"** tab → click **"Generate Domain"** to get a public URL
 
 ### Step 4 — Add environment variables
 
-In the **"Environment variables"** section, add each one:
+1. Click the **"Variables"** tab
+2. Click **"Raw Editor"** and paste all variables at once:
 
-| Key | Value |
-|---|---|
-| `PORT` | `5000` |
-| `MONGO_URI` | your MongoDB Atlas connection string |
-| `JWT_SECRET` | any long random string (e.g. `mySuperSecretKey123!@#`) |
-| `JWT_EXPIRES_IN` | `7d` |
-| `CLIENT_URL` | your Vercel URL — set this after Part 4 (use `*` for now) |
-| `CLOUDINARY_CLOUD_NAME` | your Cloudinary cloud name |
-| `CLOUDINARY_API_KEY` | your Cloudinary API key |
-| `CLOUDINARY_API_SECRET` | your Cloudinary API secret |
+```
+PORT=5000
+MONGO_URI=mongodb+srv://playeruser:yourpassword@cluster0.xxxxx.mongodb.net/player?retryWrites=true&w=majority&appName=Cluster0
+JWT_SECRET=mySuperSecretKey123!@#
+JWT_EXPIRES_IN=7d
+CLIENT_URL=*
+CLOUDINARY_CLOUD_NAME=your_cloud_name
+CLOUDINARY_API_KEY=your_api_key
+CLOUDINARY_API_SECRET=your_api_secret
+```
 
-### Step 5 — Deploy
+> Replace each value with your real credentials. Update `CLIENT_URL` to your Vercel URL after Part 4.
 
-1. Click **"Deploy"**
-2. Koyeb will build and start your server (usually 2–4 minutes)
-3. Wait for the status dot to turn **green (Healthy)**
-4. Copy your backend public URL — it looks like:
+3. Click **"Update Variables"** — Railway redeploys automatically
+
+### Step 5 — Get your backend URL
+
+1. Go to **"Settings"** → **"Networking"** → **"Public Networking"**
+2. Your backend URL looks like:
    ```
-   https://player-server-xxxx.koyeb.app
+   https://player-server-production.up.railway.app
    ```
-5. ✅ **Save this URL** — you’ll need it for Vercel
+3. ✅ **Save this URL** — you’ll need it for Vercel
 
 ### Step 6 — Seed the database (optional)
 
-Run this locally with your Atlas URI in `server/.env` to pre-load demo songs:
+Run locally with your Atlas URI in `server/.env`:
 
 ```bash
 cd server
 npm run seed
 ```
 
-You can skip this — the app works fine without seed data. Users can upload songs directly.
+You can skip this — the app works without seed data. Users can upload songs directly.
 
 ---
 
@@ -182,26 +184,27 @@ In the **"Environment Variables"** section add:
 
 | Key | Value |
 |---|---|
-| `VITE_API_URL` | your Koyeb backend URL (e.g. `https://player-server-xxxx.koyeb.app`) |
+| `VITE_API_URL` | your Railway backend URL (e.g. `https://player-server-production.up.railway.app`) |
+
+> ⚠️ No trailing slash at the end of the URL.
 
 ### Step 5 — Deploy
 
 1. Click **"Deploy"**
-2. Wait for the build to complete (1–2 minutes)
+2. Wait for the build to finish (1–2 minutes)
 3. Your frontend is live at:
    ```
    https://player-xxxx.vercel.app
    ```
 
-### Step 6 — Update CORS on Koyeb
+### Step 6 — Update CORS on Railway
 
-1. Go back to your Koyeb service dashboard
-2. Click **"Settings"** → **"Environment variables"**
-3. Update `CLIENT_URL` to your actual Vercel URL:
+1. Go back to Railway → your service → **"Variables"** tab
+2. Update `CLIENT_URL` to your actual Vercel URL:
    ```
    https://player-xxxx.vercel.app
    ```
-4. Click **"Redeploy"** — takes ~1 minute
+3. Click **"Update Variables"** — Railway redeploys automatically
 
 ---
 
@@ -215,7 +218,7 @@ Test in this order:
 4. ✅ Go to `/upload` and upload a test MP3 + cover image
 5. ✅ Go to Home — your song should appear and play
 6. ✅ Test search, like, and profile pages
-7. ✅ Check MongoDB Compass → connect to Atlas URI → `player` database should have `users` and `songs` collections
+7. ✅ Connect MongoDB Compass to your Atlas URI — you should see `users` and `songs` collections in the `player` database
 
 ---
 
@@ -223,14 +226,15 @@ Test in this order:
 
 If you have a custom domain (e.g. from Namecheap or GoDaddy):
 
+**Frontend (Vercel):**
 1. Go to Vercel project → **"Settings"** → **"Domains"**
 2. Add your domain (e.g. `player.hillaryns.com`)
-3. Add the DNS records shown by Vercel to your domain registrar
+3. Add the DNS records shown by Vercel at your domain registrar
 4. Vercel handles HTTPS automatically
 
-For the backend custom domain on Koyeb:
-1. Go to Koyeb service → **"Settings"** → **"Domains"**
-2. Add a subdomain like `api.hillaryns.com`
+**Backend (Railway):**
+1. Go to Railway service → **"Settings"** → **"Networking"**
+2. Add a custom domain like `api.hillaryns.com`
 3. Add the CNAME record to your DNS registrar
 
 ---
@@ -240,29 +244,9 @@ For the backend custom domain on Koyeb:
 Every time you push to the `main` branch:
 
 - **Vercel** automatically rebuilds the frontend ✅
-- **Koyeb** automatically rebuilds the backend ✅
+- **Railway** automatically rebuilds the backend ✅
 
 No manual steps needed after the initial setup.
-
----
-
-## 🟡 Alternative Backend: Railway
-
-If Koyeb's free tier is unavailable or full in your region, use **Railway** as a fallback:
-
-1. Go to [https://railway.app](https://railway.app) → Sign up with GitHub
-2. Click **"New Project"** → **"Deploy from GitHub repo"**
-3. Select the `player` repository
-4. Set **Root Directory** to `server`
-5. Railway auto-detects Node.js — set **Start Command** to `node index.js`
-6. Add the same 8 environment variables from the Koyeb table above
-7. Your backend URL will be:
-   ```
-   https://player-server-production.up.railway.app
-   ```
-8. Use this as `VITE_API_URL` on Vercel
-
-> Railway gives **$5/month in free credits** that reset monthly. A small Express + MongoDB app typically uses <$1/month, so it effectively runs free forever.
 
 ---
 
@@ -270,24 +254,25 @@ If Koyeb's free tier is unavailable or full in your region, use **Railway** as a
 
 | Problem | Fix |
 |---|---|
-| CORS error in browser | Make sure `CLIENT_URL` on Koyeb matches your exact Vercel URL (no trailing slash) |
-| Login fails | Double check `JWT_SECRET` is set on Koyeb env vars |
-| Upload fails | Verify all 3 Cloudinary env vars are correct on Koyeb |
+| CORS error in browser | Make sure `CLIENT_URL` on Railway matches your exact Vercel URL (no trailing slash) |
+| Login fails | Double check `JWT_SECRET` is set in Railway Variables tab |
+| Upload fails | Verify all 3 Cloudinary env vars are correct in Railway Variables tab |
 | MongoDB connection error | Check IP whitelist on Atlas is set to `0.0.0.0/0` |
 | Blank page on Vercel | Make sure Root Directory is set to `client`, not the repo root |
 | Songs not loading | Run `npm run seed` locally with Atlas `MONGO_URI` in `server/.env` |
-| Koyeb build fails | Check that Root Directory is `server` and Run command is `node index.js` |
-| `VITE_API_URL` not working | Make sure there is no trailing `/` at the end of the Koyeb URL |
+| Railway build fails | Check Root Directory is `server` and Start Command is `node index.js` |
+| `VITE_API_URL` not working | No trailing `/` at the end of the Railway URL |
+| Railway domain not showing | Go to Settings → Networking → click "Generate Domain" |
 
 ---
 
 ## 📌 Summary of Deployment URLs
 
-After completing all parts, you'll have:
+After completing all parts, you’ll have:
 
 ```
 Frontend:   https://your-app.vercel.app
-Backend:    https://player-server-xxxx.koyeb.app
+Backend:    https://player-server-production.up.railway.app
 Database:   MongoDB Atlas (cloud)
 Storage:    Cloudinary (cloud)
 ```
