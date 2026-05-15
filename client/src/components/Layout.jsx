@@ -4,6 +4,7 @@ import PlayerBar from './PlayerBar';
 import Navbar from './Navbar';
 import MiniPlayer from './MiniPlayer';
 import MobileBottomNav from './MobileBottomNav';
+import AudioEngine from './AudioEngine';
 import usePlayerStore from '../store/playerStore';
 
 const Layout = ({ children }) => {
@@ -11,8 +12,10 @@ const Layout = ({ children }) => {
 
   return (
     <div className="h-screen flex flex-col bg-spotify-black overflow-hidden">
+      {/* Global audio engine - always mounted */}
+      <AudioEngine />
+
       <div className="flex flex-1 overflow-hidden">
-        {/* Sidebar: hidden on mobile */}
         <div className="hidden sm:block">
           <Sidebar />
         </div>
@@ -27,12 +30,10 @@ const Layout = ({ children }) => {
         </div>
       </div>
 
-      {/* Desktop player bar */}
-      <div className="hidden sm:block">
-        <PlayerBar />
-      </div>
+      {/* Desktop player bar - always visible on sm+ */}
+      <PlayerBar />
 
-      {/* Mobile: mini-player sits above bottom nav */}
+      {/* Mobile: mini-player + bottom nav */}
       <MiniPlayer />
       <MobileBottomNav />
     </div>
