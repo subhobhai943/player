@@ -4,12 +4,12 @@ This guide walks you through deploying the **Player** app completely free using:
 
 | Service | What it hosts | Free tier |
 |---|---|---|
-| [Vercel](https://vercel.com) | React frontend (client) | ✅ Always free, no credit card |
-| [Google Cloud Run](https://cloud.google.com/run) | Node.js backend (server) | ✅ 2 million requests/month free forever |
-| [MongoDB Atlas](https://www.mongodb.com/atlas) | MongoDB database | ✅ 512MB free cluster |
-| [Cloudinary](https://cloudinary.com) | Audio + image uploads | ✅ 25GB free storage |
+| [Vercel](https://vercel.com) | React frontend (client) | ✅ Always free, no card |
+| [Render](https://render.com) | Node.js backend (server) | ✅ Free, **no credit card** |
+| [MongoDB Atlas](https://www.mongodb.com/atlas) | MongoDB database | ✅ 512MB free cluster, no card |
+| [Cloudinary](https://cloudinary.com) | Audio + image uploads | ✅ 25GB free storage, no card |
 
-> ✅ **Why Google Cloud Run?** Google Cloud Run's **Always Free** tier includes 2 million requests/month, 360,000 GB-seconds of memory, and 180,000 vCPU-seconds — permanently free, no expiry. It requires a Google account (no credit card needed to stay within free limits if you set a spending cap of $0).
+> ⚠️ **Note on Render free tier:** The server sleeps after **15 minutes of inactivity**. The first request after sleep takes ~30 seconds to wake up. For a personal project this is totally fine — and it requires **zero credit card or billing setup**.
 
 ---
 
@@ -45,7 +45,7 @@ This guide walks you through deploying the **Player** app completely free using:
    ```
    mongodb+srv://playeruser:yourpassword@cluster0.xxxxx.mongodb.net/player?retryWrites=true&w=majority&appName=Cluster0
    ```
-3. ✅ **Save this string** — needed in Part 3
+3. ✅ **Save this string** — you’ll need it in Part 3
 
 ---
 
@@ -56,129 +56,75 @@ This guide walks you through deploying the **Player** app completely free using:
    - **Cloud Name**
    - **API Key**
    - **API Secret**
-3. ✅ **Save all three** — needed in Part 3
+3. ✅ **Save all three** — you’ll need them in Part 3
 
 ---
 
-## PART 3 — Google Cloud Run (Backend / Server) ⭐
+## PART 3 — Render (Backend / Server)
 
-> Google Cloud Run is a **serverless** container platform. You package your app in Docker, push it to Google, and it runs on demand. The free tier covers well over any personal project's traffic.
+> Render requires **no credit card**. Sign up with GitHub and deploy for free.
 
-### Step 1 — Set up Google Cloud
+### Step 1 — Create a Render account
 
-1. Go to [https://console.cloud.google.com](https://console.cloud.google.com)
-2. Sign in with your **Google account**
-3. Create a new project:
-   - Click the project dropdown at the top → **"New Project"**
-   - Name it `player-app` → click **"Create"**
-4. Make sure this project is selected in the top dropdown
+1. Go to [https://render.com](https://render.com)
+2. Click **"Get Started"** → **"Continue with GitHub"**
+3. Authorize Render to access your GitHub
 
-### Step 2 — Set a $0 spending cap (important!)
+### Step 2 — Create a new Web Service
 
-To make sure you are never charged:
+1. On the dashboard click **"New +"** → **"Web Service"**
+2. Choose **"Build and deploy from a Git repository"**
+3. Find and select the **`player`** repository → click **"Connect"**
 
-1. In the left sidebar go to **"Billing"**
-2. Click **"Budgets & alerts"** → **"Create Budget"**
-3. Set amount to `$0` and enable email alerts at 100%
-4. This ensures you get an email if you ever approach the free tier limit
+### Step 3 — Configure the service
 
-### Step 3 — Enable required APIs
+| Setting | Value |
+|---|---|
+| **Name** | `player-server` |
+| **Region** | `Singapore` (closest to India) |
+| **Branch** | `main` |
+| **Root Directory** | `server` |
+| **Runtime** | `Node` |
+| **Build Command** | `npm install` |
+| **Start Command** | `node index.js` |
+| **Instance Type** | `Free` |
 
-1. Go to [https://console.cloud.google.com/apis/library](https://console.cloud.google.com/apis/library)
-2. Search for and **Enable** each of these:
-   - **Cloud Run API**
-   - **Cloud Build API**
-   - **Artifact Registry API**
+### Step 4 — Add environment variables
 
-### Step 4 — Install Google Cloud CLI
-
-Download and install from: [https://cloud.google.com/sdk/docs/install](https://cloud.google.com/sdk/docs/install)
-
-Then run:
-```bash
-gcloud init
-# Sign in with your Google account when prompted
-# Select your 'player-app' project
-```
-
-### Step 5 — Add a Dockerfile to the server
-
-Create `server/Dockerfile` with this content:
-
-```dockerfile
-FROM node:20-alpine
-WORKDIR /app
-COPY package*.json ./
-RUN npm install --production
-COPY . .
-EXPOSE 8080
-ENV PORT=8080
-CMD ["node", "index.js"]
-```
-
-> ⚠️ Cloud Run uses port **8080** by default. The `PORT` env var is set to `8080` here and your Express app already reads from `process.env.PORT`.
-
-Also create `server/.dockerignore`:
-```
-node_modules
-.env
-*.log
-```
-
-### Step 6 — Deploy to Cloud Run
-
-From your terminal, inside the `server/` folder:
-
-```bash
-cd server
-
-gcloud run deploy player-server \
-  --source . \
-  --region asia-south1 \
-  --platform managed \
-  --allow-unauthenticated \
-  --port 8080
-```
-
-- `--source .` tells Cloud Build to build the Docker image automatically
-- `--region asia-south1` is Mumbai — closest to India
-- `--allow-unauthenticated` makes it publicly accessible
-
-This takes 3–5 minutes on first deploy. You’ll see a URL at the end:
-```
-Service URL: https://player-server-xxxxxxxxxx-el.a.run.app
-```
-
-✅ **Save this URL** — you’ll need it for Vercel.
-
-### Step 7 — Set environment variables on Cloud Run
-
-1. Go to [https://console.cloud.google.com/run](https://console.cloud.google.com/run)
-2. Click on **`player-server`**
-3. Click **"Edit & Deploy New Revision"**
-4. Scroll to **"Variables & Secrets"** → **"Environment variables"**
-5. Add each variable:
+Scroll down to **"Environment Variables"** and add each one:
 
 | Key | Value |
 |---|---|
-| `PORT` | `8080` |
+| `PORT` | `5000` |
 | `MONGO_URI` | your MongoDB Atlas connection string |
 | `JWT_SECRET` | any long random string (e.g. `mySuperSecretKey123!@#`) |
 | `JWT_EXPIRES_IN` | `7d` |
-| `CLIENT_URL` | your Vercel URL — update after Part 4 (use `*` for now) |
+| `CLIENT_URL` | `*` (update to your Vercel URL after Part 4) |
 | `CLOUDINARY_CLOUD_NAME` | your Cloudinary cloud name |
 | `CLOUDINARY_API_KEY` | your Cloudinary API key |
 | `CLOUDINARY_API_SECRET` | your Cloudinary API secret |
 
-6. Click **"Deploy"** — takes ~2 minutes
+### Step 5 — Deploy
 
-### Step 8 — Seed the database (optional)
+1. Click **"Create Web Service"**
+2. Render installs dependencies and starts the server (2–3 minutes)
+3. Wait for the status badge to show **"Live"**
+4. Copy your backend URL — it looks like:
+   ```
+   https://player-server.onrender.com
+   ```
+5. ✅ **Save this URL** — you’ll need it for Vercel
+
+### Step 6 — Seed the database (optional)
+
+Run locally with your Atlas URI in `server/.env`:
 
 ```bash
 cd server
-# Make sure server/.env has your Atlas MONGO_URI
 npm run seed
 ```
+
+You can skip this — the app works without seed data. Users can upload songs directly.
 
 ---
 
@@ -188,6 +134,7 @@ npm run seed
 
 1. Go to [https://vercel.com](https://vercel.com)
 2. Click **"Sign Up"** → **"Continue with GitHub"**
+3. Authorize Vercel
 
 ### Step 2 — Import the project
 
@@ -208,9 +155,9 @@ npm run seed
 
 | Key | Value |
 |---|---|
-| `VITE_API_URL` | your Cloud Run URL (e.g. `https://player-server-xxxxxxxxxx-el.a.run.app`) |
+| `VITE_API_URL` | your Render backend URL (e.g. `https://player-server.onrender.com`) |
 
-> ⚠️ No trailing slash.
+> ⚠️ No trailing slash at the end of the URL.
 
 ### Step 5 — Deploy
 
@@ -220,14 +167,14 @@ npm run seed
    https://player-xxxx.vercel.app
    ```
 
-### Step 6 — Update CORS on Cloud Run
+### Step 6 — Update CORS on Render
 
-1. Go to Cloud Run → `player-server` → **"Edit & Deploy New Revision"**
-2. Update `CLIENT_URL` env var to your Vercel URL:
+1. Go to Render → your `player-server` service → **"Environment"** tab
+2. Update `CLIENT_URL` to your actual Vercel URL:
    ```
    https://player-xxxx.vercel.app
    ```
-3. Click **"Deploy"**
+3. Click **"Save Changes"** — Render redeploys automatically
 
 ---
 
@@ -238,38 +185,30 @@ npm run seed
 3. ✅ Go to `/upload` and upload a test MP3 + cover image
 4. ✅ Go to Home — your song should appear and play
 5. ✅ Test search, like, and profile pages
-6. ✅ Connect MongoDB Compass to your Atlas URI — check `users` and `songs` collections
+6. ✅ Connect MongoDB Compass to your Atlas URI — check `users` and `songs` collections in the `player` database
 
 ---
 
-## PART 6 — Re-deploying After Code Changes
-
-**Frontend (Vercel):** Auto-redeploys on every `git push` to `main`. ✅
-
-**Backend (Cloud Run):** Run this from the `server/` folder:
-
-```bash
-cd server
-gcloud run deploy player-server --source . --region asia-south1 --platform managed --allow-unauthenticated --port 8080
-```
-
-Or set up **Cloud Build trigger** to auto-deploy on push:
-1. Go to [https://console.cloud.google.com/cloud-build/triggers](https://console.cloud.google.com/cloud-build/triggers)
-2. Click **"Create Trigger"** → connect GitHub → select `player` repo
-3. Set branch to `main`, build config to `Dockerfile` in `server/`
-
----
-
-## PART 7 — Custom Domain (Optional)
+## PART 6 — Custom Domain (Optional)
 
 **Frontend (Vercel):**
-1. Vercel project → **"Settings"** → **"Domains"** → add your domain
-2. Add DNS records at your registrar
+1. Vercel project → **"Settings"** → **"Domains"** → add your domain (e.g. `player.hillaryns.com`)
+2. Add the DNS records shown by Vercel at your domain registrar
 
-**Backend (Cloud Run):**
-1. Cloud Run → `player-server` → **"Manage Custom Domains"**
-2. Add `api.hillaryns.com` and verify domain ownership
-3. Add the DNS records shown to your registrar
+**Backend (Render):**
+1. Render service → **"Settings"** → **"Custom Domain"**
+2. Add `api.hillaryns.com` and add the CNAME record to your DNS registrar
+
+---
+
+## 🔁 Re-deploying After Code Changes
+
+Every time you push to the `main` branch:
+
+- **Vercel** automatically rebuilds the frontend ✅
+- **Render** automatically rebuilds the backend ✅
+
+No manual steps needed after the initial setup.
 
 ---
 
@@ -277,15 +216,14 @@ Or set up **Cloud Build trigger** to auto-deploy on push:
 
 | Problem | Fix |
 |---|---|
-| CORS error | Make sure `CLIENT_URL` on Cloud Run matches your exact Vercel URL (no trailing slash) |
-| Login fails | Check `JWT_SECRET` is set in Cloud Run env vars |
-| Upload fails | Verify all 3 Cloudinary env vars in Cloud Run env vars |
-| MongoDB error | Check Atlas IP whitelist is `0.0.0.0/0` |
-| Blank page on Vercel | Root Directory must be `client`, not repo root |
-| Cloud Run deploy fails | Make sure `server/Dockerfile` exists and Cloud Build API is enabled |
-| `gcloud` not found | Re-run `gcloud init` after installing Google Cloud CLI |
-| `VITE_API_URL` not working | No trailing `/` at the end of Cloud Run URL |
-| Port error on Cloud Run | Make sure `PORT=8080` in env vars and Dockerfile `EXPOSE 8080` |
+| Server takes 30s to respond | Render free tier woke from sleep — normal, just wait and retry |
+| CORS error in browser | Make sure `CLIENT_URL` on Render matches your exact Vercel URL (no trailing slash) |
+| Login fails | Double check `JWT_SECRET` is set in Render Environment tab |
+| Upload fails | Verify all 3 Cloudinary env vars are correct in Render |
+| MongoDB connection error | Check Atlas IP whitelist is set to `0.0.0.0/0` |
+| Blank page on Vercel | Root Directory must be `client`, not the repo root |
+| Songs not loading | Run `npm run seed` locally with Atlas `MONGO_URI` in `server/.env` |
+| `VITE_API_URL` not working | No trailing `/` at the end of the Render URL |
 
 ---
 
@@ -293,7 +231,7 @@ Or set up **Cloud Build trigger** to auto-deploy on push:
 
 ```
 Frontend:   https://your-app.vercel.app
-Backend:    https://player-server-xxxxxxxxxx-el.a.run.app
+Backend:    https://player-server.onrender.com
 Database:   MongoDB Atlas (cloud)
 Storage:    Cloudinary (cloud)
 ```
