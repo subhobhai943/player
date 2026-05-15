@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import Layout from '../components/Layout';
 import SongCard from '../components/SongCard';
-import api from '../api/axiosInstance';
 import useAuthStore from '../store/authStore';
+import { fetchFeaturedSongs } from '../api/musicApi';
 
 const Home = () => {
   const { user, isAuthenticated } = useAuthStore();
@@ -17,18 +17,20 @@ const Home = () => {
   };
 
   useEffect(() => {
-    const fetchSongs = async () => {
+    const load = async () => {
+      setLoading(true);
       try {
-        const { data } = await api.get('/songs');
-        setSongs(data);
-      } catch {
+        const featured = await fetchFeaturedSongs('hindi', 20);
+        setSongs(featured);
+      } catch (e) {
+        console.error('Failed to load featured songs', e);
         setSongs([]);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchSongs();
+    load();
   }, []);
 
   return (
@@ -40,7 +42,9 @@ const Home = () => {
       {loading ? (
         <p className="text-spotify-light">Loading songs...</p>
       ) : songs.length === 0 ? (
-        <p className="text-spotify-light">No songs available yet. Seed the database or upload songs.</p>
+        <p className="text-spotify-light">
+          No songs available yet. Try again in a moment.
+        </p>
       ) : (
         <>
           <section className="mb-8">
