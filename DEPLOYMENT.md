@@ -5,11 +5,13 @@ This guide walks you through deploying the **Player** app completely free using:
 | Service | What it hosts | Free tier |
 |---|---|---|
 | [Vercel](https://vercel.com) | React frontend (client) | ✅ Always free |
-| [Render](https://render.com) | Node.js backend (server) | ✅ Free (sleeps after 15min idle) |
+| [Koyeb](https://koyeb.com) | Node.js backend (server) | ✅ Always-on, **no cold starts** |
 | [MongoDB Atlas](https://www.mongodb.com/atlas) | MongoDB database | ✅ 512MB free cluster |
 | [Cloudinary](https://cloudinary.com) | Audio + image uploads | ✅ 25GB free storage |
 
-> ⚠️ On Render's free plan, the server **sleeps after 15 minutes of inactivity**. The first request after sleep takes ~30 seconds. Upgrade to a paid plan ($7/mo) to avoid this.
+> ✅ **Why Koyeb instead of Render?** Render's free tier sleeps after 15 minutes of inactivity (30s cold start). Koyeb's free tier is **always-on with zero cold starts** — no credit card required.
+
+> 🟡 **Railway** is listed as an alternative at the end if Koyeb's free tier is unavailable in your region.
 
 ---
 
@@ -39,7 +41,7 @@ This guide walks you through deploying the **Player** app completely free using:
 3. Click **"Allow Access From Anywhere"** → this sets `0.0.0.0/0`
 4. Click **"Confirm"**
 
-> This is required so Render's servers can connect to Atlas.
+> This is required so Koyeb's servers can connect to Atlas from any IP.
 
 ### Step 4 — Get your connection string
 
@@ -51,11 +53,11 @@ This guide walks you through deploying the **Player** app completely free using:
    mongodb+srv://playeruser:<password>@cluster0.xxxxx.mongodb.net/?retryWrites=true&w=majority
    ```
 5. Replace `<password>` with your actual password
-6. Add your database name before the `?`:
+6. Add the database name before the `?`:
    ```
    mongodb+srv://playeruser:yourpassword@cluster0.xxxxx.mongodb.net/player?retryWrites=true&w=majority
    ```
-7. **Save this string** — you'll need it for Render
+7. ✅ **Save this string** — you’ll need it in Part 3
 
 ---
 
@@ -75,43 +77,46 @@ On the Cloudinary dashboard, copy these three values:
 - **API Key** (e.g. `123456789012345`)
 - **API Secret** (e.g. `abcDEFghiJKL_mno123`)
 
-**Save all three** — you'll need them for Render.
+✅ **Save all three** — you’ll need them in Part 3.
 
 ---
 
-## PART 3 — Render (Backend / Server)
+## PART 3 — Koyeb (Backend / Server) ⭐ Recommended
 
-### Step 1 — Create a Render account
+> Koyeb offers a permanently free web service with **no sleep, no cold starts, and no credit card required**.
 
-1. Go to [https://render.com](https://render.com)
-2. Click **"Get Started"** → sign up with GitHub
-3. Authorize Render to access your GitHub
+### Step 1 — Create a Koyeb account
 
-### Step 2 — Create a new Web Service
+1. Go to [https://app.koyeb.com](https://app.koyeb.com)
+2. Click **"Sign up"** → **"Continue with GitHub"**
+3. Authorize Koyeb to access your GitHub
 
-1. On the Render dashboard click **"New +"** → **"Web Service"**
-2. Connect your GitHub account if not already done
-3. Find and select the **`player`** repository
-4. Click **"Connect"**
+### Step 2 — Create a new service
+
+1. On the Koyeb dashboard click **"Create Service"**
+2. Choose **"GitHub"** as the deployment source
+3. Select your **`player`** repository
+4. Set **Branch** to `main`
 
 ### Step 3 — Configure the service
 
-Fill in the settings:
+Fill in the build & run settings:
 
 | Setting | Value |
 |---|---|
-| **Name** | `player-server` |
-| **Region** | Singapore (closest to India) |
+| **Service name** | `player-server` |
+| **Region** | `Singapore` (closest to India) |
 | **Branch** | `main` |
-| **Root Directory** | `server` |
-| **Runtime** | `Node` |
-| **Build Command** | `npm install` |
-| **Start Command** | `node index.js` |
-| **Instance Type** | `Free` |
+| **Root directory** | `server` |
+| **Builder** | `Buildpack` (auto-detects Node.js) |
+| **Build command** | `npm install` |
+| **Run command** | `node index.js` |
+| **Instance type** | `Free` |
+| **Port** | `5000` |
 
 ### Step 4 — Add environment variables
 
-Scroll down to the **"Environment Variables"** section and add each one:
+In the **"Environment variables"** section, add each one:
 
 | Key | Value |
 |---|---|
@@ -119,35 +124,32 @@ Scroll down to the **"Environment Variables"** section and add each one:
 | `MONGO_URI` | your MongoDB Atlas connection string |
 | `JWT_SECRET` | any long random string (e.g. `mySuperSecretKey123!@#`) |
 | `JWT_EXPIRES_IN` | `7d` |
-| `CLIENT_URL` | your Vercel URL (add after deploying frontend — see Part 4 Step 5) |
+| `CLIENT_URL` | your Vercel URL — set this after Part 4 (use `*` for now) |
 | `CLOUDINARY_CLOUD_NAME` | your Cloudinary cloud name |
 | `CLOUDINARY_API_KEY` | your Cloudinary API key |
 | `CLOUDINARY_API_SECRET` | your Cloudinary API secret |
 
-> ⚠️ You can update `CLIENT_URL` after the frontend is deployed. For now set it to `*` as a placeholder.
-
 ### Step 5 — Deploy
 
-1. Click **"Create Web Service"**
-2. Render will install dependencies and start the server
-3. Wait for the status to show **"Live"** (usually 2–3 minutes)
-4. Copy your backend URL — it looks like:
+1. Click **"Deploy"**
+2. Koyeb will build and start your server (usually 2–4 minutes)
+3. Wait for the status dot to turn **green (Healthy)**
+4. Copy your backend public URL — it looks like:
    ```
-   https://player-server.onrender.com
+   https://player-server-xxxx.koyeb.app
    ```
-5. **Save this URL** — you'll need it for Vercel
+5. ✅ **Save this URL** — you’ll need it for Vercel
 
-### Step 6 — Seed the database
+### Step 6 — Seed the database (optional)
 
-After the server is live, run the seed script locally pointing at Atlas:
+Run this locally with your Atlas URI in `server/.env` to pre-load demo songs:
 
 ```bash
 cd server
-# Temporarily set MONGO_URI in your local .env to the Atlas connection string
 npm run seed
 ```
 
-Or wait — the app works without seed data, users can upload songs directly.
+You can skip this — the app works fine without seed data. Users can upload songs directly.
 
 ---
 
@@ -166,8 +168,6 @@ Or wait — the app works without seed data, users can upload songs directly.
 
 ### Step 3 — Configure the project
 
-Vercel will auto-detect it as a monorepo. Configure:
-
 | Setting | Value |
 |---|---|
 | **Framework Preset** | `Vite` |
@@ -182,24 +182,9 @@ In the **"Environment Variables"** section add:
 
 | Key | Value |
 |---|---|
-| `VITE_API_URL` | your Render backend URL (e.g. `https://player-server.onrender.com`) |
+| `VITE_API_URL` | your Koyeb backend URL (e.g. `https://player-server-xxxx.koyeb.app`) |
 
-### Step 5 — Fix API proxy for production
-
-The Vite proxy only works in development. For production, update `client/src/api/axiosInstance.js` so it uses your Render URL in production:
-
-```js
-const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL
-    ? `${import.meta.env.VITE_API_URL}/api`
-    : '/api',
-  withCredentials: true,
-});
-```
-
-Commit and push this change before deploying.
-
-### Step 6 — Deploy
+### Step 5 — Deploy
 
 1. Click **"Deploy"**
 2. Wait for the build to complete (1–2 minutes)
@@ -208,15 +193,15 @@ Commit and push this change before deploying.
    https://player-xxxx.vercel.app
    ```
 
-### Step 7 — Update CORS on Render
+### Step 6 — Update CORS on Koyeb
 
-1. Go back to your Render service dashboard
-2. Go to **"Environment"** tab
+1. Go back to your Koyeb service dashboard
+2. Click **"Settings"** → **"Environment variables"**
 3. Update `CLIENT_URL` to your actual Vercel URL:
    ```
    https://player-xxxx.vercel.app
    ```
-4. Click **"Save Changes"** — Render will restart the server automatically
+4. Click **"Redeploy"** — takes ~1 minute
 
 ---
 
@@ -230,6 +215,7 @@ Test in this order:
 4. ✅ Go to `/upload` and upload a test MP3 + cover image
 5. ✅ Go to Home — your song should appear and play
 6. ✅ Test search, like, and profile pages
+7. ✅ Check MongoDB Compass → connect to Atlas URI → `player` database should have `users` and `songs` collections
 
 ---
 
@@ -242,6 +228,11 @@ If you have a custom domain (e.g. from Namecheap or GoDaddy):
 3. Add the DNS records shown by Vercel to your domain registrar
 4. Vercel handles HTTPS automatically
 
+For the backend custom domain on Koyeb:
+1. Go to Koyeb service → **"Settings"** → **"Domains"**
+2. Add a subdomain like `api.hillaryns.com`
+3. Add the CNAME record to your DNS registrar
+
 ---
 
 ## 🔁 Re-deploying After Code Changes
@@ -249,9 +240,29 @@ If you have a custom domain (e.g. from Namecheap or GoDaddy):
 Every time you push to the `main` branch:
 
 - **Vercel** automatically rebuilds the frontend ✅
-- **Render** automatically rebuilds the backend ✅
+- **Koyeb** automatically rebuilds the backend ✅
 
-No manual steps needed after initial setup.
+No manual steps needed after the initial setup.
+
+---
+
+## 🟡 Alternative Backend: Railway
+
+If Koyeb's free tier is unavailable or full in your region, use **Railway** as a fallback:
+
+1. Go to [https://railway.app](https://railway.app) → Sign up with GitHub
+2. Click **"New Project"** → **"Deploy from GitHub repo"**
+3. Select the `player` repository
+4. Set **Root Directory** to `server`
+5. Railway auto-detects Node.js — set **Start Command** to `node index.js`
+6. Add the same 8 environment variables from the Koyeb table above
+7. Your backend URL will be:
+   ```
+   https://player-server-production.up.railway.app
+   ```
+8. Use this as `VITE_API_URL` on Vercel
+
+> Railway gives **$5/month in free credits** that reset monthly. A small Express + MongoDB app typically uses <$1/month, so it effectively runs free forever.
 
 ---
 
@@ -259,13 +270,14 @@ No manual steps needed after initial setup.
 
 | Problem | Fix |
 |---|---|
-| Backend returns 502/503 | Render free tier is sleeping — wait 30 seconds and retry |
-| CORS error in browser | Make sure `CLIENT_URL` on Render matches your exact Vercel URL (no trailing slash) |
-| Login fails | Double check `JWT_SECRET` is set on Render |
-| Upload fails | Verify all 3 Cloudinary env vars are set correctly on Render |
+| CORS error in browser | Make sure `CLIENT_URL` on Koyeb matches your exact Vercel URL (no trailing slash) |
+| Login fails | Double check `JWT_SECRET` is set on Koyeb env vars |
+| Upload fails | Verify all 3 Cloudinary env vars are correct on Koyeb |
 | MongoDB connection error | Check IP whitelist on Atlas is set to `0.0.0.0/0` |
 | Blank page on Vercel | Make sure Root Directory is set to `client`, not the repo root |
-| Songs not loading | Run `npm run seed` locally with Atlas `MONGO_URI` in your `.env` |
+| Songs not loading | Run `npm run seed` locally with Atlas `MONGO_URI` in `server/.env` |
+| Koyeb build fails | Check that Root Directory is `server` and Run command is `node index.js` |
+| `VITE_API_URL` not working | Make sure there is no trailing `/` at the end of the Koyeb URL |
 
 ---
 
@@ -275,7 +287,7 @@ After completing all parts, you'll have:
 
 ```
 Frontend:   https://your-app.vercel.app
-Backend:    https://player-server.onrender.com
+Backend:    https://player-server-xxxx.koyeb.app
 Database:   MongoDB Atlas (cloud)
 Storage:    Cloudinary (cloud)
 ```
