@@ -8,7 +8,8 @@ const MiniPlayer = () => {
   if (!currentSong) return null;
 
   return (
-    <div className="sm:hidden fixed bottom-0 left-0 right-0 z-40 glass border-t border-white/10 px-3 py-2.5 animate-slide-up">
+    <div className="sm:hidden fixed z-40 left-2 right-2 glass border border-white/10 rounded-2xl px-3 py-2.5 animate-slide-up shadow-2xl"
+      style={{ bottom: '60px' }}>
       <div className="flex items-center gap-3">
         <div className="relative shrink-0">
           <img
@@ -45,6 +46,14 @@ const MiniPlayer = () => {
             <SkipForward size={20} />
           </button>
         </div>
+      </div>
+
+      {/* Progress bar */}
+      <div className="mt-2 h-0.5 bg-white/10 rounded-full overflow-hidden">
+        <div
+          className="h-full bg-spotify-green rounded-full transition-all duration-1000"
+          style={{ width: '30%' }}
+        />
       </div>
     </div>
   );

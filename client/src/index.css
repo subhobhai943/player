@@ -21,6 +21,10 @@
 ::-webkit-scrollbar-thumb { background: #535353; border-radius: 4px; }
 ::-webkit-scrollbar-thumb:hover { background: #1DB954; }
 
+/* Hide scrollbar for horizontal scroll rows */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
 /* 3D card tilt on hover */
 .card-3d {
   transform-style: preserve-3d;
@@ -33,20 +37,16 @@
 }
 
 /* Smooth page content transitions */
-.page-enter {
-  animation: fade-in 0.45s ease-out both;
-}
+.page-enter { animation: fade-in 0.45s ease-out both; }
 
 /* Active song glow ring */
-.song-active {
-  box-shadow: 0 0 0 2px #1DB954, 0 8px 24px rgba(29,185,84,0.25);
-}
+.song-active { box-shadow: 0 0 0 2px #1DB954, 0 8px 24px rgba(29,185,84,0.25); }
 
 /* Glass-morphism panel */
 .glass {
-  background: rgba(40, 40, 40, 0.6);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
+  background: rgba(30,30,40,0.72);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
   border: 1px solid rgba(255,255,255,0.06);
 }
 
