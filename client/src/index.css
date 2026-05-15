@@ -2,25 +2,93 @@
 @tailwind components;
 @tailwind utilities;
 
-body {
-  background-color: #121212;
-  color: #ffffff;
-  margin: 0;
-  padding: 0;
-  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+@layer base {
+  body {
+    background-color: #121212;
+    color: #ffffff;
+    margin: 0;
+    padding: 0;
+    font-family: 'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  * { box-sizing: border-box; }
 }
 
-* {
-  box-sizing: border-box;
+/* Scrollbar */
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: #121212; }
+::-webkit-scrollbar-thumb { background: #535353; border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: #1DB954; }
+
+/* 3D card tilt on hover */
+.card-3d {
+  transform-style: preserve-3d;
+  transition: transform 0.35s cubic-bezier(.25,.8,.25,1), box-shadow 0.35s ease;
+  will-change: transform;
+}
+.card-3d:hover {
+  transform: perspective(800px) rotateX(-4deg) rotateY(4deg) translateY(-6px) scale(1.04);
+  box-shadow: 0 24px 48px rgba(0,0,0,0.5), 0 0 0 1px rgba(29,185,84,0.15);
 }
 
-::-webkit-scrollbar {
-  width: 6px;
+/* Smooth page content transitions */
+.page-enter {
+  animation: fade-in 0.45s ease-out both;
 }
-::-webkit-scrollbar-track {
-  background: #121212;
+
+/* Active song glow ring */
+.song-active {
+  box-shadow: 0 0 0 2px #1DB954, 0 8px 24px rgba(29,185,84,0.25);
 }
-::-webkit-scrollbar-thumb {
-  background: #535353;
-  border-radius: 3px;
+
+/* Glass-morphism panel */
+.glass {
+  background: rgba(40, 40, 40, 0.6);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255,255,255,0.06);
+}
+
+/* Animated equaliser bars */
+.eq-bar {
+  display: inline-block;
+  width: 3px;
+  border-radius: 2px;
+  background: #1DB954;
+  transform-origin: bottom;
+}
+
+/* Shimmer skeleton */
+.shimmer {
+  background: linear-gradient(90deg, #282828 25%, #333 50%, #282828 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.6s linear infinite;
+}
+
+/* Gradient text */
+.gradient-text {
+  background: linear-gradient(135deg, #1DB954 0%, #17a349 50%, #0d7a36 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Smooth focus ring */
+input:focus, button:focus-visible {
+  outline: 2px solid #1DB954;
+  outline-offset: 2px;
+}
+
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes shimmer {
+  from { background-position: -200% 0; }
+  to   { background-position:  200% 0; }
+}
+@keyframes bar-bounce {
+  0%, 100% { transform: scaleY(0.4); }
+  50%       { transform: scaleY(1); }
 }

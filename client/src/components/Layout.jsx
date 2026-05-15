@@ -14,7 +14,7 @@ const Layout = ({ children }) => {
         </div>
         <div className="flex flex-col flex-1 overflow-hidden">
           <Navbar />
-          <main className="flex-1 overflow-y-auto p-4 sm:p-6 bg-gradient-to-b from-[#1f1f1f] to-spotify-black pb-20 sm:pb-6">
+          <main className="flex-1 overflow-y-auto p-4 sm:p-6 bg-gradient-to-b from-[#1a1a2e] via-[#16213e] to-spotify-black pb-24 sm:pb-6 page-enter">
             {children}
           </main>
         </div>

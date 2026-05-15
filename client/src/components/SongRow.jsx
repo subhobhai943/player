@@ -1,8 +1,7 @@
 import React from 'react';
-import { Play, Pause } from 'lucide-react';
+import { Play, Pause, Heart } from 'lucide-react';
 import usePlayerStore from '../store/playerStore';
 import useLike from '../hooks/useLike';
-import { Heart } from 'lucide-react';
 
 const SongRow = ({ song, index, queue = [] }) => {
   const { playSong, pauseSong, resumeSong, setQueue, currentSong, isPlaying } = usePlayerStore();
@@ -19,54 +18,66 @@ const SongRow = ({ song, index, queue = [] }) => {
   const handleClick = () => {
     if (isActive && isPlaying) pauseSong();
     else if (isActive) resumeSong();
-    else {
-      setQueue(queue);
-      playSong(song);
-    }
+    else { setQueue(queue); playSong(song); }
   };
 
   return (
     <div
       onClick={handleClick}
-      className={`group grid grid-cols-[16px_4fr_2fr_auto_1fr] gap-4 items-center px-4 py-2 rounded-md cursor-pointer hover:bg-white/10 transition-colors ${
-        isActive ? 'text-spotify-green' : 'text-spotify-light'
+      className={`group grid grid-cols-[20px_4fr_2fr_auto_1fr] gap-4 items-center px-3 py-2.5 rounded-xl cursor-pointer transition-all duration-200 ${
+        isActive
+          ? 'bg-white/10 text-spotify-green'
+          : 'text-spotify-light hover:bg-white/5 hover:text-white'
       }`}
     >
+      {/* Index / play indicator */}
       <span className="text-sm flex items-center justify-center">
-        {isActive && isPlaying
-          ? <Pause size={14} className="text-spotify-green" />
-          : <>
-              <span className="group-hover:hidden block">{index + 1}</span>
-              <Play size={14} className="hidden group-hover:block" />
-            </>}
+        {isActive && isPlaying ? (
+          <div className="flex items-end gap-0.5 h-3.5">
+            <span className="eq-bar h-full animate-bar-1" style={{height:'14px'}} />
+            <span className="eq-bar animate-bar-2" style={{height:'10px'}} />
+            <span className="eq-bar h-full animate-bar-3" style={{height:'14px'}} />
+          </div>
+        ) : (
+          <>
+            <span className="group-hover:hidden block">{index + 1}</span>
+            <Play size={13} className="hidden group-hover:block" />
+          </>
+        )}
       </span>
 
+      {/* Cover + title + artist */}
       <div className="flex items-center gap-3 min-w-0">
         <img
           src={song.coverUrl || 'https://placehold.co/40x40/282828/ffffff?text=♪'}
           alt={song.title}
-          className="w-10 h-10 rounded object-cover"
+          className={`w-10 h-10 rounded-lg object-cover transition-transform duration-200 ${
+            isActive ? 'ring-2 ring-spotify-green' : 'group-hover:scale-105'
+          }`}
         />
         <div className="min-w-0">
-          <p className={`text-sm font-medium truncate ${isActive ? 'text-spotify-green' : 'text-white'}`}>
-            {song.title}
-          </p>
-          <p className="text-xs truncate">{song.artist}</p>
+          <p className={`text-sm font-semibold truncate ${
+            isActive ? 'text-spotify-green' : 'text-white'
+          }`}>{song.title}</p>
+          <p className="text-xs truncate text-spotify-light">{song.artist}</p>
         </div>
       </div>
 
-      <p className="text-sm truncate hidden sm:block">{song.album?.title || '—'}</p>
+      {/* Album */}
+      <p className="text-sm truncate hidden sm:block text-spotify-light">{song.album?.title || '—'}</p>
 
+      {/* Like */}
       <button
         onClick={(e) => { e.stopPropagation(); toggleLike(); }}
-        className={`transition-colors opacity-0 group-hover:opacity-100 ${
-          liked ? 'text-spotify-green opacity-100' : 'text-spotify-light hover:text-white'
+        className={`transition-all duration-200 opacity-0 group-hover:opacity-100 hover:scale-125 active:scale-90 ${
+          liked ? 'text-pink-400 opacity-100' : 'text-spotify-light'
         }`}
       >
-        <Heart size={16} fill={liked ? 'currentColor' : 'none'} />
+        <Heart size={15} fill={liked ? 'currentColor' : 'none'} />
       </button>
 
-      <p className="text-sm text-right tabular-nums">{formatTime(song.duration)}</p>
+      {/* Duration */}
+      <p className="text-sm text-right tabular-nums text-spotify-light">{formatTime(song.duration)}</p>
     </div>
   );
 };
