@@ -1,75 +1,64 @@
-# 🎵 Spotify Clone
+# 🎵 Player
 
 A full-stack Spotify/Apple Music-like web application built with **React.js**, **Node.js/Express**, and **MongoDB**.
 
-## Tech Stack
+## Stack
 
-| Layer | Technology |
-|---|---|
-| Frontend | React.js (Vite), Tailwind CSS, React Router, Zustand |
-| Backend | Node.js, Express.js |
-| Database | MongoDB (Mongoose) — compatible with MongoDB Compass |
-| Auth | JWT (JSON Web Tokens) |
-| Storage | Cloudinary (audio + images) |
+- Frontend: React.js (Vite), Tailwind CSS, React Router, Zustand
+- Backend: Node.js, Express.js
+- Database: MongoDB with Mongoose (MongoDB Compass-friendly)
+- Auth: JWT
+- Storage: Cloudinary for audio and cover image uploads
 
-## Project Structure
+## Features
 
-```
-spotify-clone/
-├── client/               # React frontend
-│   ├── public/
-│   └── src/
-│       ├── components/   # Reusable UI components
-│       ├── pages/        # Route-based pages
-│       ├── store/        # Zustand state management
-│       ├── hooks/        # Custom React hooks
-│       ├── api/          # Axios API service
-│       └── assets/       # Icons, images
-├── server/               # Express backend
-│   ├── models/           # Mongoose schemas
-│   ├── routes/           # API route definitions
-│   ├── controllers/      # Route handler logic
-│   ├── middleware/       # Auth + error middleware
-│   └── index.js          # Server entry point
-├── .gitignore
-├── .env.example
-└── README.md
-```
+- User registration and login
+- Spotify-style player layout
+- Bottom audio player with play/pause, seek, volume, next/previous
+- Song upload with Cloudinary
+- Albums and playlists APIs
+- Liked songs
+- Search songs by title, artist, or genre
+- Seed script for demo content
 
-## Getting Started
-
-### Prerequisites
-- Node.js >= 18
-- MongoDB (local or Atlas) — connect via MongoDB Compass
-- Cloudinary account (for media uploads)
-
-### Installation
+## Local Setup
 
 ```bash
-# Clone the repo
-git clone https://github.com/subhobhai943/spotify-clone.git
-cd spotify-clone
+git clone https://github.com/subhobhai943/player.git
+cd player
 
-# Install server dependencies
-cd server && npm install
-
-# Install client dependencies
-cd ../client && npm install
-```
-
-### Environment Variables
-
-Copy `.env.example` to `.env` inside `/server` and fill in your values.
-
-### Run in Development
-
-```bash
-# Start backend (from /server)
+# Backend
+cd server
+npm install
+cp ../.env.example .env
 npm run dev
 
-# Start frontend (from /client)
+# Frontend (new terminal)
+cd ../client
+npm install
 npm run dev
 ```
 
-Frontend runs on `http://localhost:5173`  
-Backend runs on `http://localhost:5000`
+## Environment Variables
+
+Create `server/.env` using the root `.env.example` values:
+
+```env
+PORT=5000
+MONGO_URI=mongodb://localhost:27017/player
+JWT_SECRET=your_super_secret_key
+JWT_EXPIRES_IN=7d
+CLIENT_URL=http://localhost:5173
+CLOUDINARY_CLOUD_NAME=your_cloud_name
+CLOUDINARY_API_KEY=your_api_key
+CLOUDINARY_API_SECRET=your_api_secret
+```
+
+## Seed Demo Songs
+
+```bash
+cd server
+npm run seed
+```
+
+This inserts demo albums and playable MP3 URLs so the UI works immediately.
