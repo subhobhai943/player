@@ -1,18 +1,16 @@
 import React from 'react';
-import { Play, Pause, Heart } from 'lucide-react';
+import { Play, Heart } from 'lucide-react';
 import usePlayerStore from '../store/playerStore';
 import useLike from '../hooks/useLike';
 
 const SongRow = ({ song, index, queue = [] }) => {
   const { playSong, pauseSong, resumeSong, setQueue, currentSong, isPlaying } = usePlayerStore();
   const isActive = currentSong?._id === song._id;
-  const { liked, toggleLike } = useLike(song._id);
+  const { liked, toggleLike } = useLike(song._id, song);
 
   const formatTime = (s) => {
     if (!s || isNaN(s)) return '0:00';
-    const m = Math.floor(s / 60);
-    const sec = Math.floor(s % 60);
-    return `${m}:${sec.toString().padStart(2, '0')}`;
+    return `${Math.floor(s / 60)}:${Math.floor(s % 60).toString().padStart(2, '0')}`;
   };
 
   const handleClick = () => {
@@ -25,12 +23,9 @@ const SongRow = ({ song, index, queue = [] }) => {
     <div
       onClick={handleClick}
       className={`group grid grid-cols-[20px_4fr_2fr_auto_1fr] gap-4 items-center px-3 py-2.5 rounded-xl cursor-pointer transition-all duration-200 ${
-        isActive
-          ? 'bg-white/10 text-spotify-green'
-          : 'text-spotify-light hover:bg-white/5 hover:text-white'
+        isActive ? 'bg-white/10 text-spotify-green' : 'text-spotify-light hover:bg-white/5 hover:text-white'
       }`}
     >
-      {/* Index / play indicator */}
       <span className="text-sm flex items-center justify-center">
         {isActive && isPlaying ? (
           <div className="flex items-end gap-0.5 h-3.5">
@@ -46,7 +41,6 @@ const SongRow = ({ song, index, queue = [] }) => {
         )}
       </span>
 
-      {/* Cover + title + artist */}
       <div className="flex items-center gap-3 min-w-0">
         <img
           src={song.coverUrl || 'https://placehold.co/40x40/282828/ffffff?text=♪'}
@@ -63,20 +57,17 @@ const SongRow = ({ song, index, queue = [] }) => {
         </div>
       </div>
 
-      {/* Album */}
       <p className="text-sm truncate hidden sm:block text-spotify-light">{song.album?.title || '—'}</p>
 
-      {/* Like */}
       <button
         onClick={(e) => { e.stopPropagation(); toggleLike(); }}
         className={`transition-all duration-200 opacity-0 group-hover:opacity-100 hover:scale-125 active:scale-90 ${
-          liked ? 'text-pink-400 opacity-100' : 'text-spotify-light'
+          liked ? 'text-pink-400 !opacity-100' : 'text-spotify-light'
         }`}
       >
         <Heart size={15} fill={liked ? 'currentColor' : 'none'} />
       </button>
 
-      {/* Duration */}
       <p className="text-sm text-right tabular-nums text-spotify-light">{formatTime(song.duration)}</p>
     </div>
   );

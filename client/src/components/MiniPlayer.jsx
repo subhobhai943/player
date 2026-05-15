@@ -8,10 +8,9 @@ const MiniPlayer = () => {
     currentSong, isPlaying, pauseSong, resumeSong,
     nextSong, prevSong, progress, setProgress,
   } = usePlayerStore();
-  const { liked, toggleLike } = useLike(currentSong?._id);
+  const { liked, toggleLike } = useLike(currentSong?._id, currentSong);
   const [duration, setDuration] = useState(0);
 
-  // Poll duration from global audio ref
   useEffect(() => {
     const id = setInterval(() => {
       if (window.__audioRef?.current?.duration)
@@ -32,33 +31,23 @@ const MiniPlayer = () => {
 
   return (
     <div
-      className="sm:hidden fixed z-40 left-2 right-2 glass border border-white/10 rounded-2xl shadow-2xl animate-slide-up"
+      className="sm:hidden fixed z-40 left-2 right-2 glass border border-white/10 rounded-2xl shadow-2xl"
       style={{ bottom: '60px' }}
     >
-      {/* Seek bar at top of card */}
-      <div className="px-3 pt-2">
+      <div className="px-3 pt-2.5">
         <input
-          type="range"
-          min={0}
-          max={duration || 0}
-          step={0.5}
-          value={progress}
+          type="range" min={0} max={duration || 0} step={0.5} value={progress}
           onChange={handleSeek}
           className="w-full h-1 accent-spotify-green cursor-pointer"
-          style={{
-            background: `linear-gradient(to right, #1DB954 ${pct}%, #535353 ${pct}%)`,
-          }}
+          style={{ background: `linear-gradient(to right, #1DB954 ${pct}%, #535353 ${pct}%)` }}
         />
       </div>
-
-      {/* Controls row */}
       <div className="flex items-center gap-2 px-3 py-2">
-        {/* Cover */}
         <div className="relative shrink-0">
           <img
             src={currentSong.coverUrl || 'https://placehold.co/44x44/181818/ffffff?text=♪'}
             alt={currentSong.title}
-            className={`w-11 h-11 rounded-xl object-cover shadow-md transition-all ${
+            className={`w-11 h-11 rounded-xl object-cover shadow-md ${
               isPlaying ? 'ring-2 ring-spotify-green/70' : ''
             }`}
           />
@@ -70,15 +59,11 @@ const MiniPlayer = () => {
             </div>
           )}
         </div>
-
-        {/* Title + artist */}
         <div className="flex-1 min-w-0">
           <p className="text-white text-sm font-semibold truncate">{currentSong.title}</p>
           <p className="text-spotify-light text-xs truncate">{currentSong.artist}</p>
         </div>
-
-        {/* Buttons */}
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-1">
           <button
             onClick={(e) => { e.stopPropagation(); toggleLike(); }}
             className={`p-1.5 transition-all active:scale-90 ${
@@ -87,20 +72,15 @@ const MiniPlayer = () => {
           >
             <Heart size={16} fill={liked ? 'currentColor' : 'none'} />
           </button>
-
           <button onClick={prevSong} className="p-1.5 text-white active:scale-90 transition">
             <SkipBack size={18} />
           </button>
-
           <button
             onClick={() => (isPlaying ? pauseSong() : resumeSong())}
             className="w-9 h-9 rounded-full bg-spotify-green flex items-center justify-center shadow-lg shadow-spotify-green/30 hover:bg-[#1ed760] active:scale-90 transition-all"
           >
-            {isPlaying
-              ? <Pause size={16} className="text-black" />
-              : <Play  size={16} className="text-black ml-0.5" />}
+            {isPlaying ? <Pause size={16} className="text-black" /> : <Play size={16} className="text-black ml-0.5" />}
           </button>
-
           <button onClick={nextSong} className="p-1.5 text-white active:scale-90 transition">
             <SkipForward size={18} />
           </button>

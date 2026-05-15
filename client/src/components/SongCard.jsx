@@ -1,10 +1,13 @@
 import React from 'react';
 import { Play, Pause } from 'lucide-react';
 import usePlayerStore from '../store/playerStore';
+import useLike from '../hooks/useLike';
+import useLikeStore from '../store/likeStore';
 
 const SongCard = ({ song, queue = [] }) => {
   const { playSong, pauseSong, resumeSong, setQueue, currentSong, isPlaying } = usePlayerStore();
   const isActive = currentSong?._id === song._id;
+  const { liked, toggleLike } = useLike(song._id, song);
 
   const handlePlay = () => {
     if (isActive && isPlaying) pauseSong();
@@ -22,7 +25,6 @@ const SongCard = ({ song, queue = [] }) => {
       }`}
       onClick={handlePlay}
     >
-      {/* Cover art */}
       <div className="relative mb-3 overflow-hidden rounded-xl">
         <img
           src={song.coverUrl || 'https://placehold.co/200x200/282828/ffffff?text=♪'}
@@ -31,9 +33,7 @@ const SongCard = ({ song, queue = [] }) => {
             isActive ? 'brightness-90' : ''
           }`}
         />
-        {/* Dark overlay on hover */}
         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-all duration-300 rounded-xl" />
-        {/* Play/pause button */}
         <button
           className={`absolute bottom-2 right-2 w-10 h-10 rounded-full bg-spotify-green flex items-center justify-center shadow-xl shadow-spotify-green/40 transition-all duration-300 ${
             isActive && isPlaying
@@ -45,8 +45,6 @@ const SongCard = ({ song, queue = [] }) => {
             ? <Pause size={18} className="text-black" fill="black" />
             : <Play  size={18} className="text-black ml-0.5" fill="black" />}
         </button>
-
-        {/* Active eq bars */}
         {isActive && isPlaying && (
           <div className="absolute top-2 left-2 flex items-end gap-0.5 h-4">
             <span className="eq-bar h-full animate-bar-1" />
@@ -55,7 +53,6 @@ const SongCard = ({ song, queue = [] }) => {
           </div>
         )}
       </div>
-
       <p className={`font-semibold text-sm truncate transition-colors ${
         isActive ? 'text-spotify-green' : 'text-white'
       }`}>{song.title}</p>
