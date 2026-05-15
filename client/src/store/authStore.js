@@ -1,19 +1,26 @@
 import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 
-const useAuthStore = create((set) => ({
-  user: null,
-  token: localStorage.getItem('token') || null,
-  isAuthenticated: !!localStorage.getItem('token'),
+const useAuthStore = create(
+  persist(
+    (set) => ({
+      user: null,
+      token: null,
+      isAuthenticated: false,
 
-  setAuth: (user, token) => {
-    localStorage.setItem('token', token);
-    set({ user, token, isAuthenticated: true });
-  },
+      setAuth: (user, token) => {
+        set({ user, token, isAuthenticated: true });
+      },
 
-  logout: () => {
-    localStorage.removeItem('token');
-    set({ user: null, token: null, isAuthenticated: false });
-  },
-}));
+      logout: () => {
+        set({ user: null, token: null, isAuthenticated: false });
+      },
+    }),
+    {
+      name: 'player-auth', // key in localStorage
+      partialize: (state) => ({ token: state.token, user: state.user, isAuthenticated: state.isAuthenticated }),
+    }
+  )
+);
 
 export default useAuthStore;

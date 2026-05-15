@@ -1,20 +1,22 @@
 import React, { useRef, useEffect, useState } from 'react';
 import {
   Play, Pause, SkipBack, SkipForward,
-  Volume2, VolumeX, Heart, Shuffle, Repeat
+  Volume2, VolumeX, Shuffle, Repeat
 } from 'lucide-react';
+import { Heart } from 'lucide-react';
 import usePlayerStore from '../store/playerStore';
+import useLike from '../hooks/useLike';
 
 const PlayerBar = () => {
   const {
     currentSong, isPlaying, volume, progress,
-    playSong, pauseSong, resumeSong, setVolume,
+    pauseSong, resumeSong, setVolume,
     setProgress, nextSong, prevSong,
   } = usePlayerStore();
 
   const audioRef = useRef(null);
   const [duration, setDuration] = useState(0);
-  const [liked, setLiked] = useState(false);
+  const { liked, toggleLike } = useLike(currentSong?._id);
 
   useEffect(() => {
     if (!audioRef.current) return;
@@ -44,7 +46,6 @@ const PlayerBar = () => {
 
   return (
     <footer className="h-20 bg-spotify-dark border-t border-[#282828] flex items-center px-4 shrink-0">
-      {/* Hidden audio element */}
       {currentSong && (
         <audio
           ref={audioRef}
@@ -69,7 +70,7 @@ const PlayerBar = () => {
               <p className="text-spotify-light text-xs truncate">{currentSong.artist}</p>
             </div>
             <button
-              onClick={() => setLiked(!liked)}
+              onClick={toggleLike}
               className={`ml-2 shrink-0 transition-colors ${
                 liked ? 'text-spotify-green' : 'text-spotify-light hover:text-white'
               }`}
@@ -98,8 +99,6 @@ const PlayerBar = () => {
           <button onClick={nextSong} className="text-white hover:scale-110 transition"><SkipForward size={22} /></button>
           <button className="text-spotify-light hover:text-white transition"><Repeat size={18} /></button>
         </div>
-
-        {/* Seek bar */}
         <div className="flex items-center gap-2 w-full max-w-md">
           <span className="text-xs text-spotify-light w-8 text-right">{formatTime(progress)}</span>
           <input

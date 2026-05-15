@@ -9,20 +9,28 @@ import LikedSongs from './pages/LikedSongs';
 import AlbumPage from './pages/AlbumPage';
 import PlaylistPage from './pages/PlaylistPage';
 import UploadSong from './pages/UploadSong';
+import Profile from './pages/Profile';
+import ProtectedRoute from './components/ProtectedRoute';
 
 function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/search" element={<Search />} />
-        <Route path="/library" element={<Library />} />
-        <Route path="/liked" element={<LikedSongs />} />
-        <Route path="/albums/:id" element={<AlbumPage />} />
-        <Route path="/playlists/:id" element={<PlaylistPage />} />
-        <Route path="/upload" element={<UploadSong />} />
+        {/* Public */}
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+
+        {/* Public but better with auth */}
+        <Route path="/" element={<Home />} />
+        <Route path="/search" element={<Search />} />
+        <Route path="/albums/:id" element={<AlbumPage />} />
+        <Route path="/playlists/:id" element={<PlaylistPage />} />
+
+        {/* Protected - require login */}
+        <Route path="/library" element={<ProtectedRoute><Library /></ProtectedRoute>} />
+        <Route path="/liked" element={<ProtectedRoute><LikedSongs /></ProtectedRoute>} />
+        <Route path="/upload" element={<ProtectedRoute><UploadSong /></ProtectedRoute>} />
+        <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
       </Routes>
     </Router>
   );

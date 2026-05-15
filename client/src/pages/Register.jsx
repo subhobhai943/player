@@ -7,6 +7,7 @@ const Register = () => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const { setAuth } = useAuthStore();
@@ -15,6 +16,11 @@ const Register = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+
+    if (password !== confirmPassword) {
+      return setError('Passwords do not match');
+    }
+
     setLoading(true);
     try {
       const { data } = await api.post('/auth/register', { name, email, password });
@@ -30,35 +36,52 @@ const Register = () => {
   return (
     <div className="min-h-screen bg-spotify-black flex items-center justify-center">
       <div className="bg-spotify-dark p-10 rounded-xl w-full max-w-sm shadow-2xl">
-        <h1 className="text-3xl font-bold text-white text-center mb-8">🎵 Player</h1>
-        <h2 className="text-xl font-bold text-white text-center mb-6">Create Account</h2>
-        {error && <p className="text-red-400 text-sm text-center mb-4">{error}</p>}
+        <h1 className="text-3xl font-bold text-white text-center mb-2">🎵 Player</h1>
+        <p className="text-spotify-light text-center text-sm mb-8">Create your free account</p>
+        {error && (
+          <div className="bg-red-500/10 border border-red-500/30 text-red-400 rounded-md px-4 py-3 text-sm mb-4">
+            {error}
+          </div>
+        )}
         <form onSubmit={handleSubmit} className="space-y-4">
-          <input
-            type="text" placeholder="Full Name" value={name}
-            onChange={(e) => setName(e.target.value)} required
-            className="w-full px-4 py-3 rounded-md bg-spotify-card text-white placeholder-spotify-light focus:outline-none focus:ring-2 focus:ring-spotify-green"
-          />
-          <input
-            type="email" placeholder="Email" value={email}
-            onChange={(e) => setEmail(e.target.value)} required
-            className="w-full px-4 py-3 rounded-md bg-spotify-card text-white placeholder-spotify-light focus:outline-none focus:ring-2 focus:ring-spotify-green"
-          />
-          <input
-            type="password" placeholder="Password (min 6 chars)" value={password}
-            onChange={(e) => setPassword(e.target.value)} required minLength={6}
-            className="w-full px-4 py-3 rounded-md bg-spotify-card text-white placeholder-spotify-light focus:outline-none focus:ring-2 focus:ring-spotify-green"
-          />
+          <div>
+            <label className="text-xs text-spotify-light mb-1 block">Full name</label>
+            <input
+              type="text" value={name} onChange={(e) => setName(e.target.value)} required
+              className="w-full px-4 py-3 rounded-md bg-spotify-card text-white placeholder-spotify-light focus:outline-none focus:ring-2 focus:ring-spotify-green"
+            />
+          </div>
+          <div>
+            <label className="text-xs text-spotify-light mb-1 block">Email address</label>
+            <input
+              type="email" value={email} onChange={(e) => setEmail(e.target.value)} required
+              className="w-full px-4 py-3 rounded-md bg-spotify-card text-white placeholder-spotify-light focus:outline-none focus:ring-2 focus:ring-spotify-green"
+            />
+          </div>
+          <div>
+            <label className="text-xs text-spotify-light mb-1 block">Password</label>
+            <input
+              type="password" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={6}
+              className="w-full px-4 py-3 rounded-md bg-spotify-card text-white placeholder-spotify-light focus:outline-none focus:ring-2 focus:ring-spotify-green"
+            />
+          </div>
+          <div>
+            <label className="text-xs text-spotify-light mb-1 block">Confirm password</label>
+            <input
+              type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required
+              className="w-full px-4 py-3 rounded-md bg-spotify-card text-white placeholder-spotify-light focus:outline-none focus:ring-2 focus:ring-spotify-green"
+            />
+          </div>
           <button
             type="submit" disabled={loading}
-            className="w-full py-3 rounded-full bg-spotify-green text-black font-bold hover:scale-105 transition-transform disabled:opacity-60"
+            className="w-full py-3 rounded-full bg-spotify-green text-black font-bold hover:scale-105 transition-transform disabled:opacity-60 mt-2"
           >
             {loading ? 'Creating account...' : 'Sign Up'}
           </button>
         </form>
         <p className="text-spotify-light text-center mt-6 text-sm">
           Already have an account?{' '}
-          <a href="/login" className="text-white font-semibold underline">Log in</a>
+          <a href="/login" className="text-white font-semibold hover:underline">Log in</a>
         </p>
       </div>
     </div>
