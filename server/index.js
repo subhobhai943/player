@@ -26,7 +26,7 @@ app.use('/api/auth', require('./routes/auth'));
 app.use('/api/songs', require('./routes/songs'));
 app.use('/api/albums', require('./routes/albums'));
 app.use('/api/playlists', require('./routes/playlists'));
-app.use('/api/spotify', require('./routes/spotify'));
+app.use('/api/jiosaavn', require('./routes/jiosaavn'));
 
 app.get('/', (req, res) => {
   res.json({ message: '🎵 Player API is running!' });
