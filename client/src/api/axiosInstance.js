@@ -1,11 +1,17 @@
 import axios from 'axios';
 
+// In production (Vercel), use the Render backend URL from env var.
+// In development, use '/api' which is proxied by Vite to localhost:5000.
+const BASE_URL = import.meta.env.VITE_API_URL
+  ? `${import.meta.env.VITE_API_URL}/api`
+  : '/api';
+
 const api = axios.create({
-  baseURL: '/api',
+  baseURL: BASE_URL,
   withCredentials: true,
 });
 
-// Attach JWT from Zustand persist store
+// Attach JWT token from Zustand persisted store
 api.interceptors.request.use((config) => {
   try {
     const raw = localStorage.getItem('player-auth');
@@ -18,7 +24,7 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// On 401, clear auth and redirect to login
+// On 401, clear auth state and redirect to login
 api.interceptors.response.use(
   (res) => res,
   (error) => {
