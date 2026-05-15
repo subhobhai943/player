@@ -6,28 +6,25 @@ require('dotenv').config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Middleware
 app.use(cors({ origin: process.env.CLIENT_URL, credentials: true }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Routes (to be added)
-// app.use('/api/auth', require('./routes/auth'));
-// app.use('/api/songs', require('./routes/songs'));
-// app.use('/api/albums', require('./routes/albums'));
-// app.use('/api/playlists', require('./routes/playlists'));
+// Routes
+app.use('/api/auth', require('./routes/auth'));
+app.use('/api/songs', require('./routes/songs'));
+// app.use('/api/albums', require('./routes/albums'));   // Step 3
+// app.use('/api/playlists', require('./routes/playlists')); // Step 3
 
-// Health check
 app.get('/', (req, res) => {
-  res.json({ message: '🎵 Spotify Clone API is running!' });
+  res.json({ message: '🎵 Player API is running!' });
 });
 
-// MongoDB Connection
 mongoose
   .connect(process.env.MONGO_URI)
   .then(() => {
-    console.log('✅ MongoDB connected successfully');
-    app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+    console.log('✅ MongoDB connected');
+    app.listen(PORT, () => console.log(`🚀 Server on port ${PORT}`));
   })
   .catch((err) => {
     console.error('❌ MongoDB connection failed:', err.message);

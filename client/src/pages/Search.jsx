@@ -1,0 +1,54 @@
+import React, { useState } from 'react';
+import Layout from '../components/Layout';
+import SongRow from '../components/SongRow';
+import api from '../api/axiosInstance';
+
+const Search = () => {
+  const [query, setQuery] = useState('');
+  const [results, setResults] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  const handleSearch = async (e) => {
+    const val = e.target.value;
+    setQuery(val);
+    if (!val.trim()) { setResults([]); return; }
+    setLoading(true);
+    try {
+      const { data } = await api.get(`/songs/search?q=${encodeURIComponent(val)}`);
+      setResults(data);
+    } catch {
+      setResults([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <Layout>
+      <h1 className="text-3xl font-bold text-white mb-6">Search</h1>
+      <input
+        type="text"
+        placeholder="Artists, songs, or podcasts"
+        value={query}
+        onChange={handleSearch}
+        className="w-full max-w-md px-5 py-3 rounded-full bg-white text-black placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-spotify-green text-sm font-medium mb-8"
+      />
+      {loading && <p className="text-spotify-light">Searching...</p>}
+      {results.length > 0 && (
+        <div>
+          <h2 className="text-lg font-bold text-white mb-3">Results</h2>
+          <div className="space-y-1">
+            {results.map((song, i) => (
+              <SongRow key={song._id} song={song} index={i} queue={results} />
+            ))}
+          </div>
+        </div>
+      )}
+      {!loading && query && results.length === 0 && (
+        <p className="text-spotify-light">No results for "{query}"</p>
+      )}
+    </Layout>
+  );
+};
+
+export default Search;

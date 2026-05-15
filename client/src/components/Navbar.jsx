@@ -1,0 +1,69 @@
+import React from 'react';
+import { useNavigate } from 'react-router-dom';
+import { ChevronLeft, ChevronRight, User, LogOut } from 'lucide-react';
+import useAuthStore from '../store/authStore';
+
+const Navbar = () => {
+  const navigate = useNavigate();
+  const { isAuthenticated, user, logout } = useAuthStore();
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+  };
+
+  return (
+    <header className="flex items-center justify-between px-6 py-4 bg-transparent">
+      {/* Navigation arrows */}
+      <div className="flex items-center gap-2">
+        <button
+          onClick={() => navigate(-1)}
+          className="p-1 rounded-full bg-black/40 text-white hover:bg-black/70 transition"
+        >
+          <ChevronLeft size={20} />
+        </button>
+        <button
+          onClick={() => navigate(1)}
+          className="p-1 rounded-full bg-black/40 text-white hover:bg-black/70 transition"
+        >
+          <ChevronRight size={20} />
+        </button>
+      </div>
+
+      {/* Auth buttons */}
+      <div className="flex items-center gap-3">
+        {isAuthenticated ? (
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 bg-black rounded-full px-3 py-1">
+              <User size={16} className="text-white" />
+              <span className="text-sm text-white font-semibold">{user?.name || 'User'}</span>
+            </div>
+            <button
+              onClick={handleLogout}
+              className="p-2 rounded-full bg-black/40 text-spotify-light hover:text-white transition"
+            >
+              <LogOut size={18} />
+            </button>
+          </div>
+        ) : (
+          <>
+            <button
+              onClick={() => navigate('/register')}
+              className="text-sm font-semibold text-spotify-light hover:text-white transition"
+            >
+              Sign up
+            </button>
+            <button
+              onClick={() => navigate('/login')}
+              className="text-sm font-bold bg-white text-black px-5 py-2 rounded-full hover:scale-105 transition-transform"
+            >
+              Log in
+            </button>
+          </>
+        )}
+      </div>
+    </header>
+  );
+};
+
+export default Navbar;
