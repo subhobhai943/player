@@ -5,11 +5,11 @@ This guide walks you through deploying the **Player** app completely free using:
 | Service | What it hosts | Free tier |
 |---|---|---|
 | [Vercel](https://vercel.com) | React frontend (client) | ✅ Always free, no credit card |
-| [Railway](https://railway.app) | Node.js backend (server) | ✅ No credit card, no cold starts |
+| [Google Cloud Run](https://cloud.google.com/run) | Node.js backend (server) | ✅ 2 million requests/month free forever |
 | [MongoDB Atlas](https://www.mongodb.com/atlas) | MongoDB database | ✅ 512MB free cluster |
 | [Cloudinary](https://cloudinary.com) | Audio + image uploads | ✅ 25GB free storage |
 
-> ✅ **Why Railway?** Railway requires **no credit card** to sign up. You get $5 free trial credit for 30 days, then $1/month in ongoing free credits — a small Express app uses well under $1/month so it runs **effectively free forever** with no cold starts.
+> ✅ **Why Google Cloud Run?** Google Cloud Run's **Always Free** tier includes 2 million requests/month, 360,000 GB-seconds of memory, and 180,000 vCPU-seconds — permanently free, no expiry. It requires a Google account (no credit card needed to stay within free limits if you set a spending cap of $0).
 
 ---
 
@@ -20,7 +20,7 @@ This guide walks you through deploying the **Player** app completely free using:
 1. Go to [https://www.mongodb.com/atlas](https://www.mongodb.com/atlas)
 2. Click **"Try Free"** → sign up with Google or email
 3. Choose **"Free"** (M0 Sandbox) plan
-4. Select a cloud provider (any) and region closest to you — **Mumbai (ap-south-1)** is ideal for India
+4. Select a cloud provider and region — **Mumbai (ap-south-1)** is ideal for India
 5. Click **"Create Cluster"** — wait ~2 minutes
 
 ### Step 2 — Create a database user
@@ -28,130 +28,157 @@ This guide walks you through deploying the **Player** app completely free using:
 1. In the left sidebar click **"Database Access"**
 2. Click **"Add New Database User"**
 3. Choose **Password** authentication
-4. Set a username (e.g. `playeruser`) and a strong password
+4. Set username (e.g. `playeruser`) and a strong password
 5. Set role to **"Read and write to any database"**
 6. Click **"Add User"**
 
 ### Step 3 — Allow network access
 
 1. In the left sidebar click **"Network Access"**
-2. Click **"Add IP Address"**
-3. Click **"Allow Access From Anywhere"** → this sets `0.0.0.0/0`
-4. Click **"Confirm"**
-
-> This is required so Railway's servers can connect to Atlas from any IP.
+2. Click **"Add IP Address"** → **"Allow Access From Anywhere"** (`0.0.0.0/0`)
+3. Click **"Confirm"**
 
 ### Step 4 — Get your connection string
 
-1. Go to **"Database"** in the left sidebar
-2. Click **"Connect"** on your cluster
-3. Choose **"Connect your application"**
-4. Copy the connection string — it looks like:
-   ```
-   mongodb+srv://playeruser:<password>@cluster0.xxxxx.mongodb.net/?retryWrites=true&w=majority
-   ```
-5. Replace `<password>` with your actual password
-6. Add the database name before the `?`:
+1. Go to **"Database"** → **"Connect"** → **"Connect your application"**
+2. Copy and fill in the string:
    ```
    mongodb+srv://playeruser:yourpassword@cluster0.xxxxx.mongodb.net/player?retryWrites=true&w=majority&appName=Cluster0
    ```
-7. ✅ **Save this string** — you’ll need it in Part 3
+3. ✅ **Save this string** — needed in Part 3
 
 ---
 
 ## PART 2 — Cloudinary (File Storage)
 
-### Step 1 — Create a free account
-
-1. Go to [https://cloudinary.com](https://cloudinary.com)
-2. Click **"Sign Up For Free"**
-3. After signing up, go to your **Dashboard**
-
-### Step 2 — Collect your credentials
-
-On the Cloudinary dashboard, copy these three values:
-
-- **Cloud Name** (e.g. `dxyz12abc`)
-- **API Key** (e.g. `123456789012345`)
-- **API Secret** (e.g. `abcDEFghiJKL_mno123`)
-
-✅ **Save all three** — you’ll need them in Part 3.
+1. Go to [https://cloudinary.com](https://cloudinary.com) → **"Sign Up For Free"**
+2. From your Dashboard copy:
+   - **Cloud Name**
+   - **API Key**
+   - **API Secret**
+3. ✅ **Save all three** — needed in Part 3
 
 ---
 
-## PART 3 — Railway (Backend / Server) ⭐ Recommended
+## PART 3 — Google Cloud Run (Backend / Server) ⭐
 
-> Railway requires **no credit card**. Sign up with GitHub and deploy instantly.
+> Google Cloud Run is a **serverless** container platform. You package your app in Docker, push it to Google, and it runs on demand. The free tier covers well over any personal project's traffic.
 
-### Step 1 — Create a Railway account
+### Step 1 — Set up Google Cloud
 
-1. Go to [https://railway.app](https://railway.app)
-2. Click **"Login"** → **"Login with GitHub"**
-3. Authorize Railway to access your GitHub account
+1. Go to [https://console.cloud.google.com](https://console.cloud.google.com)
+2. Sign in with your **Google account**
+3. Create a new project:
+   - Click the project dropdown at the top → **"New Project"**
+   - Name it `player-app` → click **"Create"**
+4. Make sure this project is selected in the top dropdown
 
-### Step 2 — Create a new project
+### Step 2 — Set a $0 spending cap (important!)
 
-1. On the Railway dashboard click **"New Project"**
-2. Select **"Deploy from GitHub repo"**
-3. Find and click the **`player`** repository
-4. Railway will detect it as a Node.js app automatically
+To make sure you are never charged:
 
-### Step 3 — Configure the service
+1. In the left sidebar go to **"Billing"**
+2. Click **"Budgets & alerts"** → **"Create Budget"**
+3. Set amount to `$0` and enable email alerts at 100%
+4. This ensures you get an email if you ever approach the free tier limit
 
-After the repo is connected:
+### Step 3 — Enable required APIs
 
-1. Click on the service card that was created
-2. Go to the **"Settings"** tab
-3. Set the following:
+1. Go to [https://console.cloud.google.com/apis/library](https://console.cloud.google.com/apis/library)
+2. Search for and **Enable** each of these:
+   - **Cloud Run API**
+   - **Cloud Build API**
+   - **Artifact Registry API**
 
-| Setting | Value |
-|---|---|
-| **Root Directory** | `server` |
-| **Build Command** | `npm install` |
-| **Start Command** | `node index.js` |
-| **Watch Paths** | `server/**` |
+### Step 4 — Install Google Cloud CLI
 
-4. Go to **"Networking"** tab → click **"Generate Domain"** to get a public URL
+Download and install from: [https://cloud.google.com/sdk/docs/install](https://cloud.google.com/sdk/docs/install)
 
-### Step 4 — Add environment variables
-
-1. Click the **"Variables"** tab
-2. Click **"Raw Editor"** and paste all variables at once:
-
-```
-PORT=5000
-MONGO_URI=mongodb+srv://playeruser:yourpassword@cluster0.xxxxx.mongodb.net/player?retryWrites=true&w=majority&appName=Cluster0
-JWT_SECRET=mySuperSecretKey123!@#
-JWT_EXPIRES_IN=7d
-CLIENT_URL=*
-CLOUDINARY_CLOUD_NAME=your_cloud_name
-CLOUDINARY_API_KEY=your_api_key
-CLOUDINARY_API_SECRET=your_api_secret
+Then run:
+```bash
+gcloud init
+# Sign in with your Google account when prompted
+# Select your 'player-app' project
 ```
 
-> Replace each value with your real credentials. Update `CLIENT_URL` to your Vercel URL after Part 4.
+### Step 5 — Add a Dockerfile to the server
 
-3. Click **"Update Variables"** — Railway redeploys automatically
+Create `server/Dockerfile` with this content:
 
-### Step 5 — Get your backend URL
+```dockerfile
+FROM node:20-alpine
+WORKDIR /app
+COPY package*.json ./
+RUN npm install --production
+COPY . .
+EXPOSE 8080
+ENV PORT=8080
+CMD ["node", "index.js"]
+```
 
-1. Go to **"Settings"** → **"Networking"** → **"Public Networking"**
-2. Your backend URL looks like:
-   ```
-   https://player-server-production.up.railway.app
-   ```
-3. ✅ **Save this URL** — you’ll need it for Vercel
+> ⚠️ Cloud Run uses port **8080** by default. The `PORT` env var is set to `8080` here and your Express app already reads from `process.env.PORT`.
 
-### Step 6 — Seed the database (optional)
+Also create `server/.dockerignore`:
+```
+node_modules
+.env
+*.log
+```
 
-Run locally with your Atlas URI in `server/.env`:
+### Step 6 — Deploy to Cloud Run
+
+From your terminal, inside the `server/` folder:
 
 ```bash
 cd server
-npm run seed
+
+gcloud run deploy player-server \
+  --source . \
+  --region asia-south1 \
+  --platform managed \
+  --allow-unauthenticated \
+  --port 8080
 ```
 
-You can skip this — the app works without seed data. Users can upload songs directly.
+- `--source .` tells Cloud Build to build the Docker image automatically
+- `--region asia-south1` is Mumbai — closest to India
+- `--allow-unauthenticated` makes it publicly accessible
+
+This takes 3–5 minutes on first deploy. You’ll see a URL at the end:
+```
+Service URL: https://player-server-xxxxxxxxxx-el.a.run.app
+```
+
+✅ **Save this URL** — you’ll need it for Vercel.
+
+### Step 7 — Set environment variables on Cloud Run
+
+1. Go to [https://console.cloud.google.com/run](https://console.cloud.google.com/run)
+2. Click on **`player-server`**
+3. Click **"Edit & Deploy New Revision"**
+4. Scroll to **"Variables & Secrets"** → **"Environment variables"**
+5. Add each variable:
+
+| Key | Value |
+|---|---|
+| `PORT` | `8080` |
+| `MONGO_URI` | your MongoDB Atlas connection string |
+| `JWT_SECRET` | any long random string (e.g. `mySuperSecretKey123!@#`) |
+| `JWT_EXPIRES_IN` | `7d` |
+| `CLIENT_URL` | your Vercel URL — update after Part 4 (use `*` for now) |
+| `CLOUDINARY_CLOUD_NAME` | your Cloudinary cloud name |
+| `CLOUDINARY_API_KEY` | your Cloudinary API key |
+| `CLOUDINARY_API_SECRET` | your Cloudinary API secret |
+
+6. Click **"Deploy"** — takes ~2 minutes
+
+### Step 8 — Seed the database (optional)
+
+```bash
+cd server
+# Make sure server/.env has your Atlas MONGO_URI
+npm run seed
+```
 
 ---
 
@@ -161,11 +188,10 @@ You can skip this — the app works without seed data. Users can upload songs di
 
 1. Go to [https://vercel.com](https://vercel.com)
 2. Click **"Sign Up"** → **"Continue with GitHub"**
-3. Authorize Vercel
 
 ### Step 2 — Import the project
 
-1. On the Vercel dashboard click **"Add New..."** → **"Project"**
+1. Click **"Add New..."** → **"Project"**
 2. Find the **`player`** repository and click **"Import"**
 
 ### Step 3 — Configure the project
@@ -180,73 +206,70 @@ You can skip this — the app works without seed data. Users can upload songs di
 
 ### Step 4 — Add environment variable
 
-In the **"Environment Variables"** section add:
-
 | Key | Value |
 |---|---|
-| `VITE_API_URL` | your Railway backend URL (e.g. `https://player-server-production.up.railway.app`) |
+| `VITE_API_URL` | your Cloud Run URL (e.g. `https://player-server-xxxxxxxxxx-el.a.run.app`) |
 
-> ⚠️ No trailing slash at the end of the URL.
+> ⚠️ No trailing slash.
 
 ### Step 5 — Deploy
 
-1. Click **"Deploy"**
-2. Wait for the build to finish (1–2 minutes)
-3. Your frontend is live at:
+1. Click **"Deploy"** — wait 1–2 minutes
+2. Your frontend is live at:
    ```
    https://player-xxxx.vercel.app
    ```
 
-### Step 6 — Update CORS on Railway
+### Step 6 — Update CORS on Cloud Run
 
-1. Go back to Railway → your service → **"Variables"** tab
-2. Update `CLIENT_URL` to your actual Vercel URL:
+1. Go to Cloud Run → `player-server` → **"Edit & Deploy New Revision"**
+2. Update `CLIENT_URL` env var to your Vercel URL:
    ```
    https://player-xxxx.vercel.app
    ```
-3. Click **"Update Variables"** — Railway redeploys automatically
+3. Click **"Deploy"**
 
 ---
 
 ## PART 5 — Verify Everything Works
 
-Test in this order:
-
 1. ✅ Open your Vercel URL in a browser
 2. ✅ Click **Sign Up** and create an account
-3. ✅ You should be redirected to the Home page
-4. ✅ Go to `/upload` and upload a test MP3 + cover image
-5. ✅ Go to Home — your song should appear and play
-6. ✅ Test search, like, and profile pages
-7. ✅ Connect MongoDB Compass to your Atlas URI — you should see `users` and `songs` collections in the `player` database
+3. ✅ Go to `/upload` and upload a test MP3 + cover image
+4. ✅ Go to Home — your song should appear and play
+5. ✅ Test search, like, and profile pages
+6. ✅ Connect MongoDB Compass to your Atlas URI — check `users` and `songs` collections
 
 ---
 
-## PART 6 — Custom Domain (Optional)
+## PART 6 — Re-deploying After Code Changes
 
-If you have a custom domain (e.g. from Namecheap or GoDaddy):
+**Frontend (Vercel):** Auto-redeploys on every `git push` to `main`. ✅
+
+**Backend (Cloud Run):** Run this from the `server/` folder:
+
+```bash
+cd server
+gcloud run deploy player-server --source . --region asia-south1 --platform managed --allow-unauthenticated --port 8080
+```
+
+Or set up **Cloud Build trigger** to auto-deploy on push:
+1. Go to [https://console.cloud.google.com/cloud-build/triggers](https://console.cloud.google.com/cloud-build/triggers)
+2. Click **"Create Trigger"** → connect GitHub → select `player` repo
+3. Set branch to `main`, build config to `Dockerfile` in `server/`
+
+---
+
+## PART 7 — Custom Domain (Optional)
 
 **Frontend (Vercel):**
-1. Go to Vercel project → **"Settings"** → **"Domains"**
-2. Add your domain (e.g. `player.hillaryns.com`)
-3. Add the DNS records shown by Vercel at your domain registrar
-4. Vercel handles HTTPS automatically
+1. Vercel project → **"Settings"** → **"Domains"** → add your domain
+2. Add DNS records at your registrar
 
-**Backend (Railway):**
-1. Go to Railway service → **"Settings"** → **"Networking"**
-2. Add a custom domain like `api.hillaryns.com`
-3. Add the CNAME record to your DNS registrar
-
----
-
-## 🔁 Re-deploying After Code Changes
-
-Every time you push to the `main` branch:
-
-- **Vercel** automatically rebuilds the frontend ✅
-- **Railway** automatically rebuilds the backend ✅
-
-No manual steps needed after the initial setup.
+**Backend (Cloud Run):**
+1. Cloud Run → `player-server` → **"Manage Custom Domains"**
+2. Add `api.hillaryns.com` and verify domain ownership
+3. Add the DNS records shown to your registrar
 
 ---
 
@@ -254,25 +277,23 @@ No manual steps needed after the initial setup.
 
 | Problem | Fix |
 |---|---|
-| CORS error in browser | Make sure `CLIENT_URL` on Railway matches your exact Vercel URL (no trailing slash) |
-| Login fails | Double check `JWT_SECRET` is set in Railway Variables tab |
-| Upload fails | Verify all 3 Cloudinary env vars are correct in Railway Variables tab |
-| MongoDB connection error | Check IP whitelist on Atlas is set to `0.0.0.0/0` |
-| Blank page on Vercel | Make sure Root Directory is set to `client`, not the repo root |
-| Songs not loading | Run `npm run seed` locally with Atlas `MONGO_URI` in `server/.env` |
-| Railway build fails | Check Root Directory is `server` and Start Command is `node index.js` |
-| `VITE_API_URL` not working | No trailing `/` at the end of the Railway URL |
-| Railway domain not showing | Go to Settings → Networking → click "Generate Domain" |
+| CORS error | Make sure `CLIENT_URL` on Cloud Run matches your exact Vercel URL (no trailing slash) |
+| Login fails | Check `JWT_SECRET` is set in Cloud Run env vars |
+| Upload fails | Verify all 3 Cloudinary env vars in Cloud Run env vars |
+| MongoDB error | Check Atlas IP whitelist is `0.0.0.0/0` |
+| Blank page on Vercel | Root Directory must be `client`, not repo root |
+| Cloud Run deploy fails | Make sure `server/Dockerfile` exists and Cloud Build API is enabled |
+| `gcloud` not found | Re-run `gcloud init` after installing Google Cloud CLI |
+| `VITE_API_URL` not working | No trailing `/` at the end of Cloud Run URL |
+| Port error on Cloud Run | Make sure `PORT=8080` in env vars and Dockerfile `EXPOSE 8080` |
 
 ---
 
 ## 📌 Summary of Deployment URLs
 
-After completing all parts, you’ll have:
-
 ```
 Frontend:   https://your-app.vercel.app
-Backend:    https://player-server-production.up.railway.app
+Backend:    https://player-server-xxxxxxxxxx-el.a.run.app
 Database:   MongoDB Atlas (cloud)
 Storage:    Cloudinary (cloud)
 ```
