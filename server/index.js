@@ -11,12 +11,9 @@ const rawOrigin = (process.env.CLIENT_URL || '').replace(/\/$/, '');
 
 app.use(cors({
   origin: function (origin, callback) {
-    // Allow requests with no origin (mobile apps, curl, Postman)
     if (!origin) return callback(null, true);
     const normalizedOrigin = origin.replace(/\/$/, '');
-    if (normalizedOrigin === rawOrigin) {
-      return callback(null, true);
-    }
+    if (normalizedOrigin === rawOrigin) return callback(null, true);
     return callback(new Error('Not allowed by CORS'));
   },
   credentials: true,
@@ -29,6 +26,7 @@ app.use('/api/auth', require('./routes/auth'));
 app.use('/api/songs', require('./routes/songs'));
 app.use('/api/albums', require('./routes/albums'));
 app.use('/api/playlists', require('./routes/playlists'));
+app.use('/api/spotify', require('./routes/spotify'));
 
 app.get('/', (req, res) => {
   res.json({ message: '🎵 Player API is running!' });
