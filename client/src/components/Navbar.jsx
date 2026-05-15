@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ChevronLeft, ChevronRight, User } from 'lucide-react';
+import { ChevronLeft, ChevronRight, User, Search } from 'lucide-react';
 import useAuthStore from '../store/authStore';
 
 const Navbar = () => {
@@ -25,8 +25,18 @@ const Navbar = () => {
         </button>
       </div>
 
-      {/* Auth buttons */}
+      {/* Search (mobile) + Auth buttons */}
       <div className="flex items-center gap-3">
+        {/* Mobile search button – hidden on >= sm because sidebar already has Search */}
+        <button
+          onClick={() => navigate('/search')}
+          className="flex sm:hidden items-center gap-2 bg-white/10 text-white px-3 py-1.5 rounded-full text-sm font-medium hover:bg-white/20 transition"
+          aria-label="Search"
+        >
+          <Search size={16} />
+          <span>Search</span>
+        </button>
+
         {isAuthenticated ? (
           <button
             onClick={() => navigate('/profile')}
