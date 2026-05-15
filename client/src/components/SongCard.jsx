@@ -1,15 +1,15 @@
 import React from 'react';
-import { Play } from 'lucide-react';
+import { Play, Pause } from 'lucide-react';
 import usePlayerStore from '../store/playerStore';
 
 const SongCard = ({ song, queue = [] }) => {
-  const { playSong, setQueue, currentSong, isPlaying, pauseSong } = usePlayerStore();
+  const { playSong, pauseSong, resumeSong, setQueue, currentSong, isPlaying } = usePlayerStore();
   const isActive = currentSong?._id === song._id;
 
   const handlePlay = () => {
-    if (isActive && isPlaying) {
-      pauseSong();
-    } else {
+    if (isActive && isPlaying) pauseSong();
+    else if (isActive) resumeSong();
+    else {
       setQueue(queue.length ? queue : [song]);
       playSong(song);
     }
@@ -22,7 +22,6 @@ const SongCard = ({ song, queue = [] }) => {
       }`}
       onClick={handlePlay}
     >
-      {/* Cover */}
       <div className="relative mb-4">
         <img
           src={song.coverUrl || 'https://placehold.co/200x200/282828/ffffff?text=♪'}
@@ -30,17 +29,17 @@ const SongCard = ({ song, queue = [] }) => {
           className="w-full aspect-square object-cover rounded-md shadow-lg"
         />
         <button
-          className={`absolute bottom-2 right-2 w-10 h-10 rounded-full bg-spotify-green flex items-center justify-center shadow-lg transition-all ${
+          className={`absolute bottom-2 right-2 w-10 h-10 rounded-full bg-spotify-green flex items-center justify-center shadow-lg transition-all duration-200 ${
             isActive && isPlaying
               ? 'opacity-100 translate-y-0'
               : 'opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0'
           }`}
         >
-          <Play size={18} className="text-black ml-0.5" fill="black" />
+          {isActive && isPlaying
+            ? <Pause size={18} className="text-black" fill="black" />
+            : <Play size={18} className="text-black ml-0.5" fill="black" />}
         </button>
       </div>
-
-      {/* Info */}
       <p className="text-white font-semibold text-sm truncate">{song.title}</p>
       <p className="text-spotify-light text-xs truncate mt-1">{song.artist}</p>
     </div>

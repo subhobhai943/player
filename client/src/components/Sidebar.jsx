@@ -1,6 +1,7 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { Home, Search, Library, PlusSquare, Heart } from 'lucide-react';
+import { Home, Search, Library, PlusSquare, Heart, Upload } from 'lucide-react';
+import useAuthStore from '../store/authStore';
 
 const navItems = [
   { icon: Home, label: 'Home', to: '/' },
@@ -9,16 +10,14 @@ const navItems = [
 ];
 
 const Sidebar = () => {
+  const { isAuthenticated } = useAuthStore();
+
   return (
     <aside className="w-60 bg-black flex flex-col h-full shrink-0">
-      {/* Logo */}
       <div className="px-6 py-6">
-        <span className="text-white font-bold text-2xl tracking-tight">
-          🎵 Player
-        </span>
+        <span className="text-white font-bold text-2xl tracking-tight">🎵 Player</span>
       </div>
 
-      {/* Main nav */}
       <nav className="px-3 space-y-1">
         {navItems.map(({ icon: Icon, label, to }) => (
           <NavLink
@@ -26,9 +25,7 @@ const Sidebar = () => {
             to={to}
             className={({ isActive }) =>
               `flex items-center gap-4 px-3 py-2 rounded-md text-sm font-semibold transition-colors ${
-                isActive
-                  ? 'text-white'
-                  : 'text-spotify-light hover:text-white'
+                isActive ? 'text-white' : 'text-spotify-light hover:text-white'
               }`
             }
           >
@@ -40,26 +37,35 @@ const Sidebar = () => {
 
       <div className="border-t border-[#282828] my-4 mx-3" />
 
-      {/* Library actions */}
       <div className="px-3 space-y-1">
-        <button className="flex items-center gap-4 px-3 py-2 rounded-md text-sm font-semibold text-spotify-light hover:text-white w-full transition-colors">
-          <PlusSquare size={22} />
-          Create Playlist
-        </button>
-        <NavLink
-          to="/liked"
-          className={({ isActive }) =>
-            `flex items-center gap-4 px-3 py-2 rounded-md text-sm font-semibold transition-colors ${
-              isActive ? 'text-white' : 'text-spotify-light hover:text-white'
-            }`
-          }
-        >
-          <Heart size={22} />
-          Liked Songs
-        </NavLink>
+        {isAuthenticated && (
+          <NavLink
+            to="/liked"
+            className={({ isActive }) =>
+              `flex items-center gap-4 px-3 py-2 rounded-md text-sm font-semibold transition-colors ${
+                isActive ? 'text-white' : 'text-spotify-light hover:text-white'
+              }`
+            }
+          >
+            <Heart size={22} />
+            Liked Songs
+          </NavLink>
+        )}
+        {isAuthenticated && (
+          <NavLink
+            to="/upload"
+            className={({ isActive }) =>
+              `flex items-center gap-4 px-3 py-2 rounded-md text-sm font-semibold transition-colors ${
+                isActive ? 'text-white' : 'text-spotify-light hover:text-white'
+              }`
+            }
+          >
+            <Upload size={22} />
+            Upload Song
+          </NavLink>
+        )}
       </div>
 
-      {/* Playlist list placeholder */}
       <div className="border-t border-[#282828] my-4 mx-3" />
       <div className="px-6 flex-1 overflow-y-auto">
         <p className="text-xs text-spotify-light uppercase tracking-widest mb-3">Playlists</p>
